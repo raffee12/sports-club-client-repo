@@ -44,7 +44,7 @@ export default function Login() {
       const res = await googleLogin();
 
       // Save to DB
-      await axios.post("http://localhost:3000/users", {
+      await axios.post("https://sports-server-brown.vercel.app/users", {
         email: res.user.email,
         name: res.user.displayName,
         role: "user",

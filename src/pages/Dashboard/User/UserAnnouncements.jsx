@@ -10,7 +10,9 @@ export default function UserAnnouncements() {
   } = useQuery({
     queryKey: ["userAnnouncements"],
     queryFn: async () => {
-      const res = await axios.get("http://localhost:3000/announcements");
+      const res = await axios.get(
+        "https://sports-server-brown.vercel.app/announcements"
+      );
       return res.data;
     },
   });

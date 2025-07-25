@@ -42,7 +42,7 @@ function AuthProvider({ children }) {
       if (firebaseUser) {
         try {
           const res = await axios.get(
-            `http://localhost:3000/users/${firebaseUser.email}`
+            `https://sports-server-brown.vercel.app/users/${firebaseUser.email}`
           );
           const dbUser = res.data;
 

@@ -5,7 +5,7 @@ import { auth } from "../firebase/firebase.init"; // ✅ Firebase instance
 import useAuth from "./useAuth";
 
 const axiosSecure = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "https://sports-server-brown.vercel.app",
 });
 
 export default function useAxiosSecure() {
