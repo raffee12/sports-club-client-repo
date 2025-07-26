@@ -18,7 +18,17 @@ const ManageCourts = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
+      id: "",
+      name: "",
+      category: "",
+      type: "",
+      description: "",
+      maxPlayers: "",
+      status: "available",
+      sessionDuration: 60,
+      pricePerSession: "",
       slots: [{ time: "" }],
+      imageFile: null,
     },
   });
 
@@ -71,7 +81,12 @@ const ManageCourts = () => {
       const newCourt = {
         id: data.id,
         name: data.name,
+        category: data.category,
         type: data.type,
+        description: data.description,
+        maxPlayers: data.maxPlayers ? Number(data.maxPlayers) : null,
+        status: data.status,
+        sessionDuration: Number(data.sessionDuration),
         image: imageUrl,
         slots: slotsArray,
         pricePerSession: Number(data.pricePerSession),
@@ -115,47 +130,125 @@ const ManageCourts = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 py-10 px-4 text-white">
-      <div className="max-w-4xl mx-auto space-y-10">
-        <h2 className="text-3xl font-bold text-center">Manage Courts</h2>
+      <div className="max-w-4xl mx-auto space-y-12">
+        <h2 className="text-3xl font-extrabold text-center tracking-wide drop-shadow-lg">
+          Manage Courts
+        </h2>
 
         {/* Court Form */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="bg-white/10 p-6 rounded-2xl shadow-xl space-y-4 border border-white/20 backdrop-blur-xl"
+          className="bg-white/15 p-7 rounded-3xl shadow-2xl space-y-6 border border-white/30 backdrop-blur-lg"
         >
-          {/* ID */}
+          {/* Court ID */}
           <input
             type="text"
             placeholder="Court ID"
             {...register("id", { required: "Court ID is required" })}
-            className="input input-bordered w-full bg-white/80 text-black rounded-lg"
+            className="input input-bordered w-full bg-white/90 text-gray-900 rounded-xl placeholder-gray-500 focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-400 transition"
           />
           {errors.id && (
-            <p className="text-red-500 text-sm mt-1">{errors.id.message}</p>
+            <p className="text-red-400 text-sm mt-1 font-semibold">
+              {errors.id.message}
+            </p>
           )}
 
-          {/* Name */}
+          {/* Court Name */}
           <input
             type="text"
             placeholder="Court Name"
             {...register("name", { required: "Court name is required" })}
-            className="input input-bordered w-full bg-white/80 text-black rounded-lg"
+            className="input input-bordered w-full bg-white/90 text-gray-900 rounded-xl placeholder-gray-500 focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-400 transition"
           />
           {errors.name && (
-            <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            <p className="text-red-400 text-sm mt-1 font-semibold">
+              {errors.name.message}
+            </p>
           )}
 
-          {/* Type */}
+          {/* Court Category (Sport Type) */}
+          <select
+            {...register("category", { required: "Court category is required" })}
+            className="select select-bordered w-full bg-white/90 text-gray-900 rounded-xl focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-400 transition"
+          >
+            <option value="" disabled>
+              Select Category
+            </option>
+            <option value="tennis">Tennis</option>
+            <option value="badminton">Badminton</option>
+            <option value="squash">Squash</option>
+            <option value="basketball">Basketball</option>
+            {/* add more as needed */}
+          </select>
+          {errors.category && (
+            <p className="text-red-400 text-sm mt-1 font-semibold">
+              {errors.category.message}
+            </p>
+          )}
+
+          {/* Court Type (Indoor/Outdoor) */}
           <select
             {...register("type", { required: "Court type is required" })}
-            className="select select-bordered w-full bg-white/80 text-black rounded-lg"
+            className="select select-bordered w-full bg-white/90 text-gray-900 rounded-xl focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-400 transition"
           >
-            <option value="">Select Type</option>
+            <option value="" disabled>
+              Select Type
+            </option>
             <option value="indoor">Indoor</option>
             <option value="outdoor">Outdoor</option>
           </select>
           {errors.type && (
-            <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>
+            <p className="text-red-400 text-sm mt-1 font-semibold">
+              {errors.type.message}
+            </p>
+          )}
+
+          {/* Description */}
+          <textarea
+            placeholder="Description (optional)"
+            {...register("description")}
+            className="textarea textarea-bordered w-full bg-white/90 text-gray-900 rounded-xl placeholder-gray-500 resize-none h-20"
+          />
+
+          {/* Max Players */}
+          <input
+            type="number"
+            placeholder="Max Players (optional)"
+            {...register("maxPlayers", {
+              min: { value: 1, message: "Must be at least 1" },
+            })}
+            className="input input-bordered w-full bg-white/90 text-gray-900 rounded-xl placeholder-gray-500 focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-400 transition"
+          />
+          {errors.maxPlayers && (
+            <p className="text-red-400 text-sm mt-1 font-semibold">
+              {errors.maxPlayers.message}
+            </p>
+          )}
+
+          {/* Availability Status */}
+          <select
+            {...register("status")}
+            className="select select-bordered w-full bg-white/90 text-gray-900 rounded-xl focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-400 transition"
+          >
+            <option value="available">Available</option>
+            <option value="maintenance">Under Maintenance</option>
+            <option value="closed">Closed</option>
+          </select>
+
+          {/* Session Duration */}
+          <input
+            type="number"
+            placeholder="Session Duration (minutes)"
+            {...register("sessionDuration", {
+              required: "Session duration is required",
+              min: { value: 15, message: "Minimum 15 minutes" },
+            })}
+            className="input input-bordered w-full bg-white/90 text-gray-900 rounded-xl placeholder-gray-500 focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-400 transition"
+          />
+          {errors.sessionDuration && (
+            <p className="text-red-400 text-sm mt-1 font-semibold">
+              {errors.sessionDuration.message}
+            </p>
           )}
 
           {/* Price Per Session */}
@@ -166,28 +259,30 @@ const ManageCourts = () => {
               required: "Price per session is required",
               min: { value: 0, message: "Price must be positive" },
             })}
-            className="input input-bordered w-full bg-white/80 text-black rounded-lg"
+            className="input input-bordered w-full bg-white/90 text-gray-900 rounded-xl placeholder-gray-500 focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-400 transition"
           />
           {errors.pricePerSession && (
-            <p className="text-red-500 text-sm mt-1">
+            <p className="text-red-400 text-sm mt-1 font-semibold">
               {errors.pricePerSession.message}
             </p>
           )}
 
           {/* Slots - dynamic array */}
-          <label className="block font-semibold mb-1 mt-3">Slots</label>
+          <label className="block font-semibold mb-2 mt-4 text-indigo-200 tracking-wide">
+            Slots
+          </label>
           {fields.map((field, index) => (
-            <div key={field.id} className="flex gap-2 mb-2 items-center">
+            <div key={field.id} className="flex gap-3 mb-3 items-center">
               <input
                 type="text"
                 placeholder="e.g. 9:00 AM"
                 {...register(`slots.${index}.time`, { required: true })}
-                className="input input-bordered flex-grow bg-white/80 text-black rounded-lg"
+                className="input input-bordered flex-grow bg-white/90 text-gray-900 rounded-xl placeholder-gray-500 focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-400 transition"
               />
               <button
                 type="button"
                 onClick={() => remove(index)}
-                className="btn btn-error btn-xs text-white"
+                className="btn btn-error btn-xs text-white hover:bg-red-700 rounded-xl shadow-md transition flex items-center gap-1"
               >
                 Remove
               </button>
@@ -196,7 +291,7 @@ const ManageCourts = () => {
           <button
             type="button"
             onClick={() => append({ time: "" })}
-            className="btn btn-outline btn-sm text-white mb-4"
+            className="btn btn-outline btn-sm text-indigo-300 border-indigo-400 hover:bg-indigo-700 rounded-xl transition mb-5"
           >
             + Add Slot
           </button>
@@ -213,38 +308,44 @@ const ManageCourts = () => {
                 }
               },
             })}
-            className="file-input file-input-bordered w-full"
+            className="file-input file-input-bordered w-full bg-white/90 text-gray-900 rounded-xl"
           />
           {previewUrl && (
             <img
               src={previewUrl}
               alt="Preview"
-              className="w-24 h-24 rounded-lg object-cover border mt-2"
+              className="w-28 h-28 rounded-xl object-cover border-2 border-indigo-500 mt-3 shadow-lg"
             />
           )}
 
           <button
             type="submit"
-            className="btn btn-gradient w-full text-lg mt-4"
+            className="btn btn-gradient w-full text-lg font-semibold tracking-wide rounded-xl shadow-lg"
           >
             Add Court
           </button>
         </form>
 
         {/* Courts Table */}
-        <div className="bg-white/10 p-6 rounded-2xl shadow-xl border border-white/20 backdrop-blur-xl">
-          <h3 className="text-2xl font-semibold mb-4">All Courts</h3>
-          <div className="overflow-x-auto">
-            <table className="table w-full text-white text-sm md:text-base">
-              <thead className="bg-indigo-800 text-white">
+        <div className="bg-white/15 p-7 rounded-3xl shadow-2xl border border-white/30 backdrop-blur-lg">
+          <h3 className="text-2xl font-extrabold mb-6 text-indigo-200 tracking-wide drop-shadow-md">
+            All Courts
+          </h3>
+          <div className="overflow-x-auto rounded-lg border border-indigo-600 shadow-inner">
+            <table className="table w-full text-gray-200 text-sm md:text-base">
+              <thead className="bg-indigo-900/90 text-indigo-300">
                 <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Price/Session</th>
-                  <th>Slots</th>
-                  <th>Image</th>
-                  <th className="text-center">Actions</th>
+                  <th className="border border-indigo-700">ID</th>
+                  <th className="border border-indigo-700">Name</th>
+                  <th className="border border-indigo-700">Category</th>
+                  <th className="border border-indigo-700">Type</th>
+                  <th className="border border-indigo-700">Price/Session</th>
+                  <th className="border border-indigo-700">Slots</th>
+                  <th className="border border-indigo-700">Status</th>
+                  <th className="border border-indigo-700">Max Players</th>
+                  <th className="border border-indigo-700">Duration (min)</th>
+                  <th className="border border-indigo-700">Image</th>
+                  <th className="border border-indigo-700 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -252,24 +353,32 @@ const ManageCourts = () => {
                   courts.map((court) => (
                     <tr
                       key={court._id}
-                      className="hover:bg-gray-100 text-black transition"
+                      className="hover:bg-indigo-800/40 transition-colors text-gray-900 font-semibold"
                     >
-                      <td>{court.id}</td>
-                      <td>{court.name}</td>
-                      <td>{court.type}</td>
-                      <td>${court.pricePerSession}</td>
-                      <td>{court.slots?.join(", ")}</td>
-                      <td>
+                      <td className="border border-indigo-700 px-3 py-2">{court.id}</td>
+                      <td className="border border-indigo-700 px-3 py-2">{court.name}</td>
+                      <td className="border border-indigo-700 px-3 py-2 capitalize">{court.category}</td>
+                      <td className="border border-indigo-700 px-3 py-2 capitalize">{court.type}</td>
+                      <td className="border border-indigo-700 px-3 py-2">${court.pricePerSession}</td>
+                      <td className="border border-indigo-700 px-3 py-2 max-w-xs whitespace-normal">
+                        {court.slots?.join(", ")}
+                      </td>
+                      <td className="border border-indigo-700 px-3 py-2 capitalize">{court.status}</td>
+                      <td className="border border-indigo-700 px-3 py-2">
+                        {court.maxPlayers ?? "—"}
+                      </td>
+                      <td className="border border-indigo-700 px-3 py-2">{court.sessionDuration}</td>
+                      <td className="border border-indigo-700 px-3 py-2">
                         <img
                           src={court.image}
                           alt={court.name}
-                          className="w-16 h-16 object-cover rounded"
+                          className="w-20 h-20 object-cover rounded-xl shadow-md"
                         />
                       </td>
-                      <td className="flex justify-center gap-2 py-2">
+                      <td className="border border-indigo-700 px-3 py-2 flex justify-center gap-2">
                         <button
                           onClick={() => handleDelete(court._id)}
-                          className="btn btn-xs bg-red-600 text-white hover:bg-red-700 rounded flex items-center gap-1"
+                          className="btn btn-xs bg-red-600 text-white hover:bg-red-700 rounded-xl shadow-md flex items-center gap-1 transition"
                         >
                           <FaTrash /> Delete
                         </button>
@@ -278,7 +387,10 @@ const ManageCourts = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="text-center text-gray-300 py-6">
+                    <td
+                      colSpan="11"
+                      className="text-center text-indigo-300 py-10 font-semibold"
+                    >
                       No courts available.
                     </td>
                   </tr>
@@ -287,18 +399,20 @@ const ManageCourts = () => {
             </table>
           </div>
         </div>
-      </div>
 
-      <style>{`
-        .btn-gradient {
-          background: linear-gradient(to right, #8b5cf6, #6366f1, #3b82f6);
-          transition: all 0.3s ease;
-        }
-        .btn-gradient:hover {
-          background: linear-gradient(to right, #7c3aed, #4f46e5, #2563eb);
-          transform: scale(1.02);
-        }
-      `}</style>
+        <style>{`
+          .btn-gradient {
+            background: linear-gradient(90deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.6);
+            transition: all 0.3s ease;
+          }
+          .btn-gradient:hover {
+            background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 50%, #2563eb 100%);
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.8);
+          }
+        `}</style>
+      </div>
     </div>
   );
 };

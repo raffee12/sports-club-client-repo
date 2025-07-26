@@ -4,31 +4,37 @@ import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout.jsx";
 import DashboardLayout from "../layouts/DashboardLayout/DashboardLayout.jsx";
 
-// Pages
-import ErrorPage from "../pages/Error/ErrorPage.jsx";
+// Public Pages
 import Home from "../pages/Home.jsx";
 import Login from "../pages/Login.jsx";
 import Register from "../pages/Register.jsx";
 import CourtsPage from "../pages/CourtsPage.jsx";
 import ForbiddenPage from "../pages/forbidden/forbiddenPage.jsx";
+import ErrorPage from "../pages/Error/ErrorPage.jsx";
 
-// User Pages
+// Route Guards
+import PrivateRoute from "./PrivateRoute.jsx";
+import AdminRoute from "./AdminRoute.jsx";
+import MemberRoute from "./MemberRoute.jsx";
+import DashboardRedirect from "../components/DashboardRedirect.jsx";
+
+// ✅ User Dashboard Pages
+import UserProfile from "../pages/Dashboard/User/UserProfile.jsx";
 import UserBookings from "../pages/Dashboard/User/UserBookings.jsx";
 import UserAnnouncements from "../pages/Dashboard/User/UserAnnouncements.jsx";
-import UserProfile from "../pages/Dashboard/User/UserProfile.jsx";
-import MakeAdmin from "../pages/Dashboard/User/MakeAdmin.jsx";
 
-// Admin Pages
+// ✅ Admin Dashboard Pages
 import AdminProfile from "../pages/Dashboard/Admin/AdminProfile.jsx";
+import MakeAdmin from "../pages/Dashboard/Admin/MakeAdmin.jsx";
 import MakeAnnouncement from "../pages/Dashboard/Admin/MakeAnnouncement.jsx";
 import ManageBookings from "../pages/Dashboard/Admin/ManageBookings.jsx";
 import ManageCoupons from "../pages/Dashboard/Admin/ManageCoupons.jsx";
 import ManageCourts from "../pages/Dashboard/Admin/ManageCourts.jsx";
 import ManageMembers from "../pages/Dashboard/Admin/ManageMembers.jsx";
-import ManageUser from "../pages/Dashboard/Admin/ManageUsers.jsx";
+import ManageUsers from "../pages/Dashboard/Admin/ManageUsers.jsx";
 import ManageBookingsApproval from "../pages/Dashboard/Admin/ManageBookingsApproval.jsx";
 
-// Member Pages
+// ✅ Member Dashboard Pages
 import MemberProfile from "../pages/Dashboard/Member/MemberProfile.jsx";
 import PendingBookings from "../pages/Dashboard/Member/PendingBookings.jsx";
 import ApprovedBookings from "../pages/Dashboard/Member/ApprovedBookings.jsx";
@@ -37,13 +43,8 @@ import PaymentPage from "../pages/Dashboard/Member/PaymentPage.jsx";
 import PaymentHistory from "../pages/Dashboard/Member/PaymentHistory.jsx";
 import MemberAnnouncements from "../pages/Dashboard/Member/MemberAnnouncements.jsx";
 
-// Routes and protection
-import AdminRoute from "./AdminRoute.jsx";
-import PrivateRoute from "./PrivateRoute.jsx";
-import MemberRoute from "./MemberRoute.jsx";
-import DashboardRedirect from "../components/DashboardRedirect.jsx"; // smart role-based redirect
-
 const router = createBrowserRouter([
+  // 🌐 Public Site
   {
     path: "/",
     element: <MainLayout />,
@@ -56,35 +57,60 @@ const router = createBrowserRouter([
       { path: "/forbidden", element: <ForbiddenPage /> },
     ],
   },
+
+  // 🧭 Dashboard with role-based redirect
   {
     path: "/dashboard",
-    element: <DashboardLayout />,
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     errorElement: <ErrorPage />,
     children: [
-      {
-        index: true,
-        element: <DashboardRedirect />,
-      },
+      // 🔁 Smart redirect to /dashboard/[role]/...
+      { index: true, element: <DashboardRedirect /> },
 
-      // 🟡 User Routes
-      { path: "user/profile", element: <UserProfile /> },
-      { path: "user/bookings", element: <UserBookings /> },
-      { path: "user/announcements", element: <UserAnnouncements /> },
+      // 🟡 User Routes (PrivateRoute)
       {
-        path: "user/make-admin",
+        path: "user/profile",
         element: (
           <PrivateRoute>
-            <MakeAdmin />
+            <UserProfile />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "user/bookings",
+        element: (
+          <PrivateRoute>
+            <UserBookings />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "user/announcements",
+        element: (
+          <PrivateRoute>
+            <UserAnnouncements />
           </PrivateRoute>
         ),
       },
 
-      // 🔒 Admin Protected Routes
+      // 🔴 Admin Routes (AdminRoute)
       {
         path: "admin/profile",
         element: (
           <AdminRoute>
             <AdminProfile />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "admin/make-admin",
+        element: (
+          <AdminRoute>
+            <MakeAdmin />
           </AdminRoute>
         ),
       },
@@ -140,12 +166,12 @@ const router = createBrowserRouter([
         path: "admin/users",
         element: (
           <AdminRoute>
-            <ManageUser />
+            <ManageUsers />
           </AdminRoute>
         ),
       },
 
-      // 🟢 Member Protected Routes
+      // 🟢 Member Routes (MemberRoute)
       {
         path: "member/profile",
         element: (
