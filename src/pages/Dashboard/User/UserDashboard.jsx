@@ -4,7 +4,6 @@ import {
   AiOutlineHome,
   AiOutlineUser,
   AiOutlineNotification,
-  AiOutlineUserAdd,
 } from "react-icons/ai";
 import useUserRole from "../../../hooks/useUserRole";
 
@@ -66,16 +65,6 @@ const UserDashboard = () => {
             Announcements
           </NavLink>
         </li>
-
-        {/* Only show Make Admin if not already admin */}
-        {!isAdmin && (
-          <li>
-            <NavLink to="/dashboard/user/make-admin" className={linkClass}>
-              <AiOutlineUserAdd size={20} />
-              Make Admin
-            </NavLink>
-          </li>
-        )}
       </ul>
     </div>
   );

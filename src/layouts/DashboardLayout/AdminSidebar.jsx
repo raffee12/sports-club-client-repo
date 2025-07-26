@@ -5,6 +5,7 @@ import {
   AiOutlineUser,
   AiOutlineNotification,
   AiOutlineSetting,
+  AiOutlineUserAdd,
 } from "react-icons/ai";
 import { MdOutlineDiscount, MdOutlineSportsTennis } from "react-icons/md";
 import { HiOutlineUsers } from "react-icons/hi2";
@@ -32,6 +33,13 @@ const AdminSidebar = () => {
           <NavLink to="/dashboard/admin/profile" className={linkClass}>
             <AiOutlineUser size={20} />
             Admin Profile
+          </NavLink>
+        </li>
+        {/* ✅ Make Admin — only shown in AdminSidebar */}
+        <li>
+          <NavLink to="/dashboard/admin/make-admin" className={linkClass}>
+            <AiOutlineUserAdd size={20} />
+            Make Admin
           </NavLink>
         </li>
         <li>
