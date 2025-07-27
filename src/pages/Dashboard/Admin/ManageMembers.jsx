@@ -1,30 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import Swal from "sweetalert2";
 
 const ManageMembers = () => {
   const axiosSecure = useAxiosSecure();
-
-  const [members, setMembers] = useState([]);
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
 
-  // Fetch all members from backend
-  const fetchMembers = async () => {
-    setLoading(true);
-    try {
-      // Assuming your backend has an endpoint to get all members
-      const res = await axiosSecure.get("/members"); 
-      setMembers(res.data);
-    } catch (error) {
-      Swal.fire("Error", "Failed to load members", "error");
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchMembers();
-  }, []);
+  // Fetch members using TanStack Query
+  const { data: members = [], isLoading } = useQuery({
+    queryKey: ["members"],
+    queryFn: async () => {
+      const res = await axiosSecure.get("/members");
+      return res.data;
+    },
+  });
 
   // Handle deleting a member
   const handleDelete = async (id) => {
@@ -41,20 +32,22 @@ const ManageMembers = () => {
       try {
         await axiosSecure.delete(`/members/${id}`);
         Swal.fire("Deleted!", "Member has been removed.", "success");
-        fetchMembers();
+        queryClient.invalidateQueries(["members"]);
       } catch (error) {
         Swal.fire("Error", "Failed to delete member", "error");
       }
     }
   };
 
-  // Filter members by search term (case-insensitive)
+  // Filter members safely by search term
   const filteredMembers = members.filter((member) =>
-    member.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (member?.name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading)
-    return <div className="text-center text-gray-700 py-10">Loading members...</div>;
+  if (isLoading)
+    return (
+      <div className="text-center text-gray-700 py-10">Loading members...</div>
+    );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 p-6 text-white">
@@ -80,7 +73,9 @@ const ManageMembers = () => {
                 <tr>
                   <th className="border border-indigo-700 px-3 py-2">Name</th>
                   <th className="border border-indigo-700 px-3 py-2">Email</th>
-                  <th className="border border-indigo-700 px-3 py-2 text-center">Actions</th>
+                  <th className="border border-indigo-700 px-3 py-2 text-center">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
