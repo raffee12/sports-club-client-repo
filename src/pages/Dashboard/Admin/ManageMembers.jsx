@@ -13,12 +13,15 @@ const ManageMembers = () => {
     queryKey: ["members"],
     queryFn: async () => {
       const res = await axiosSecure.get("/members");
+      console.log(res.data);
       return res.data;
     },
   });
 
   // Handle deleting a member
   const handleDelete = async (id) => {
+    console.log("Attempting to delete member ID:", id);
+
     const confirm = await Swal.fire({
       title: "Are you sure?",
       text: "This member will be deleted!",
@@ -30,11 +33,17 @@ const ManageMembers = () => {
 
     if (confirm.isConfirmed) {
       try {
-        await axiosSecure.delete(`/members/${id}`);
+        const res = await axiosSecure.delete(`/members/${id}`);
+        console.log("Delete result:", res.data);
         Swal.fire("Deleted!", "Member has been removed.", "success");
-        queryClient.invalidateQueries(["members"]);
+        refetch();
       } catch (error) {
-        Swal.fire("Error", "Failed to delete member", "error");
+        console.error("Delete failed:", error.response?.data || error.message);
+        Swal.fire(
+          "Error",
+          "You are not authorized or deletion failed",
+          "error"
+        );
       }
     }
   };
