@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase/firebase.init"; // ✅ Firebase instance
+import { auth } from "../firebase/firebase.init";
 import useAuth from "./useAuth";
 
 const axiosSecure = axios.create({
@@ -10,16 +10,16 @@ const axiosSecure = axios.create({
 
 export default function useAxiosSecure() {
   const navigate = useNavigate();
-  const { logOut } = useAuth(); // ❌ Don't use custom user
+  const { logOut } = useAuth();
 
   useEffect(() => {
     const requestInterceptor = axiosSecure.interceptors.request.use(
       async (config) => {
-        const currentUser = auth.currentUser; // ✅ Get Firebase user
+        const currentUser = auth.currentUser;
         if (currentUser) {
-          const token = await currentUser.getIdToken();
+          const token = await currentUser.getIdToken(true);
+          console.log("Sending token:", token); // <--- Added this line
           config.headers.Authorization = `Bearer ${token}`;
-          console.log("TOKEN 🔐", token); // ✅ SEE YOUR TOKEN
         }
         return config;
       },
@@ -30,6 +30,7 @@ export default function useAxiosSecure() {
       (res) => res,
       async (error) => {
         if (error.response?.status === 401 || error.response?.status === 403) {
+          console.warn("Unauthorized — logging out.");
           await logOut();
           navigate("/login");
         }

@@ -78,7 +78,7 @@ const AdminSidebar = () => {
         </li>
 
         <li>
-          <NavLink to="/dashboard/admin/members" className={linkClass}>
+          <NavLink to="/dashboard/admin/manage-members" className={linkClass}>
             <HiOutlineUsers size={20} />
             Manage Members
           </NavLink>
