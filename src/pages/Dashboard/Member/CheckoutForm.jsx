@@ -24,12 +24,18 @@ const CheckoutForm = () => {
   const [discount, setDiscount] = useState(0); // %
   const [finalPrice, setFinalPrice] = useState(originalPrice);
 
+  // Debug logs to check data availability
+  useEffect(() => {
+    console.log("User:", user);
+    console.log("Booking:", booking);
+  }, [user, booking]);
+
   // === Handle Coupon Apply ===
   const handleApplyCoupon = async () => {
     try {
-      const res = await axiosSecure.get("/coupons"); // 🔁 make sure your /coupons returns valid list
+      const res = await axiosSecure.get("/coupons"); // make sure /coupons returns valid list
       const valid = res.data.find(
-        (c) => c.code === coupon && new Date(c.expiryDate) >= new Date()
+        (c) => c.code === coupon && new Date(c.expiresAt) >= new Date()
       );
       if (valid) {
         setDiscount(valid.discount);
@@ -45,14 +51,18 @@ const CheckoutForm = () => {
     }
   };
 
-  // === Generate client secret ===
+  // === Generate client secret whenever finalPrice changes ===
   useEffect(() => {
     if (finalPrice > 0) {
       axiosSecure
         .post("/create-payment-intent", { amount: finalPrice })
-        .then((res) => setClientSecret(res.data.clientSecret));
+        .then((res) => setClientSecret(res.data.clientSecret))
+        .catch((err) => {
+          console.error("Payment intent error:", err);
+          setError("Failed to initialize payment");
+        });
     }
-  }, [finalPrice]);
+  }, [finalPrice, axiosSecure]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -88,10 +98,10 @@ const CheckoutForm = () => {
           amount: finalPrice,
           transactionId: paymentIntent.id,
           paymentMethod: paymentIntent.payment_method_types,
-          courtName: booking?.courtName,
-          courtType: booking?.courtType,
-          date: booking?.date,
-          slots: booking?.slots,
+          courtName: booking?.courtName || "N/A",
+          courtType: booking?.courtType || "N/A",
+          date: booking?.date || "N/A",
+          slots: booking?.slots || [],
           originalPrice: originalPrice,
           discountedPrice: finalPrice,
           discountApplied: discount,
@@ -125,14 +135,15 @@ const CheckoutForm = () => {
         Secure Payment
       </h2>
 
-      {/* === Coupon === */}
+      {/* Coupon input + Apply button */}
       <div className="flex gap-2 mb-4">
         <input
           type="text"
           placeholder="Enter coupon code"
           value={coupon}
-          onChange={(e) => setCoupon(e.target.value)}
+          onChange={(e) => setCoupon(e.target.value.trim())}
           className="input input-bordered w-full"
+          autoComplete="off"
         />
         <button onClick={handleApplyCoupon} className="btn btn-accent">
           Apply
@@ -140,29 +151,29 @@ const CheckoutForm = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5 text-white">
-        {/* === Readonly Fields === */}
+        {/* Readonly fields */}
         <div className="grid gap-3">
           <input
             type="text"
-            value={user?.email}
+            value={user?.email || "No email"}
             readOnly
             className="input input-bordered w-full bg-gray-100 text-gray-700"
           />
           <input
             type="text"
-            value={booking?.courtType}
+            value={booking?.courtType || "N/A"}
             readOnly
             className="input input-bordered w-full bg-gray-100 text-gray-700"
           />
           <input
             type="text"
-            value={booking?.slots?.join(", ")}
+            value={booking?.slots?.length ? booking.slots.join(", ") : "N/A"}
             readOnly
             className="input input-bordered w-full bg-gray-100 text-gray-700"
           />
           <input
             type="text"
-            value={booking?.date}
+            value={booking?.date || "N/A"}
             readOnly
             className="input input-bordered w-full bg-gray-100 text-gray-700"
           />
@@ -174,7 +185,7 @@ const CheckoutForm = () => {
           />
         </div>
 
-        {/* === Card === */}
+        {/* Card input */}
         <div className="p-3 rounded-lg bg-white shadow">
           <CardElement
             options={{
@@ -190,7 +201,7 @@ const CheckoutForm = () => {
           />
         </div>
 
-        {/* === Button & Messages === */}
+        {/* Submit button */}
         <button
           type="submit"
           disabled={!stripe || !clientSecret || processing}
@@ -203,6 +214,7 @@ const CheckoutForm = () => {
           {processing ? "Processing..." : `Pay $${finalPrice.toFixed(2)}`}
         </button>
 
+        {/* Error & Success messages */}
         {error && <p className="text-sm text-red-400 text-center">{error}</p>}
         {transactionId && (
           <p className="text-sm text-green-400 text-center mt-2">

@@ -106,7 +106,7 @@ export default function MemberSidebar() {
             </NavLink>
           </li>
 
-          <li>
+          {/* <li>
             <NavLink
               to="/dashboard/member/payments"
               className={({ isActive }) =>
@@ -117,7 +117,7 @@ export default function MemberSidebar() {
             >
               <FaHistory /> Payment History
             </NavLink>
-          </li>
+          </li> */}
 
           <li>
             <NavLink
