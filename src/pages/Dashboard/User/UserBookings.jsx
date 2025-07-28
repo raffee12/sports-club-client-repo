@@ -14,6 +14,7 @@ export default function UserBookings() {
   const axiosSecure = useAxiosSecure();
   const queryClient = useQueryClient();
   const [cancelingId, setCancelingId] = useState(null);
+
   const { role, isRoleLoading, refetch: refetchRole } = useUserRole();
 
   const {
@@ -57,17 +58,30 @@ export default function UserBookings() {
     if (result.isConfirmed) {
       try {
         setCancelingId(bookingId);
-        await axiosSecure.delete(`/bookings/${bookingId}`);
+        const response = await axiosSecure.delete(`/bookings/${bookingId}`);
 
-        queryClient.setQueryData(["userBookings"], (old) =>
-          old ? old.filter((b) => b._id !== bookingId) : []
+        if (response.status === 200 || response.data?.deletedCount === 1) {
+          queryClient.setQueryData(["userBookings"], (old) =>
+            old ? old.filter((b) => b._id !== bookingId) : []
+          );
+
+          await refetchRole();
+
+          Swal.fire(
+            "Cancelled!",
+            "Your booking has been cancelled.",
+            "success"
+          );
+        } else {
+          throw new Error("Cancellation not confirmed by server.");
+        }
+      } catch (error) {
+        console.error("Cancel booking failed:", error);
+        Swal.fire(
+          "Error",
+          "Failed to cancel booking. Please try again.",
+          "error"
         );
-
-        await refetchRole();
-
-        Swal.fire("Cancelled!", "Your booking has been cancelled.", "success");
-      } catch {
-        Swal.fire("Error", "Failed to cancel booking.", "error");
       } finally {
         setCancelingId(null);
       }
@@ -147,7 +161,7 @@ export default function UserBookings() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center px-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center">
           <AnimatePresence>
             {bookings.map((booking) => {
               const bookingDate = booking.date || "";
@@ -159,7 +173,7 @@ export default function UserBookings() {
               return (
                 <motion.div
                   key={booking._id}
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  initial={{ opacity: 0, scale: 0.9, y: 30 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8, y: -20 }}
                   transition={{ duration: 0.3 }}

@@ -60,10 +60,12 @@ function BookingModal({ court, onClose }) {
         icon: "success",
         title: "Booking Submitted",
         html: `
-          <p><strong>${court.name}</strong> for ${bookingDate}</p>
-          <p>Slots: ${selectedSlots.join(", ")}</p>
-          <p>Total Price: $${totalPrice}</p>
-          <p>Status: Pending Approval</p>
+          <p><strong>${
+            court.name
+          }</strong> for <span style="color:#f97316;">${bookingDate}</span></p>
+          <p>Slots: <strong>${selectedSlots.join(", ")}</strong></p>
+          <p>Total Price: <strong style="color:#facc15;">$${totalPrice}</strong></p>
+          <p>Status: <strong style="color:#f43f5e;">Pending Approval</strong></p>
         `,
       }).then(() => onClose());
     } catch (err) {
@@ -89,21 +91,30 @@ function BookingModal({ court, onClose }) {
           &times;
         </button>
 
-        <h2 className="text-2xl font-bold mb-4">{court.name} Booking</h2>
+        <h2 className="text-2xl font-bold mb-4 text-orange-400">
+          {court.name} Booking
+        </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Court Type */}
           <div>
-            <label className="block font-semibold">Court Type</label>
+            <label className="block font-semibold text-teal-300">
+              Court Type
+            </label>
             <input
               type="text"
               value={court.type}
               readOnly
-              className="w-full rounded px-3 py-2 bg-gray-700 cursor-not-allowed"
+              className="w-full rounded px-3 py-2 bg-gray-700 text-gray-300 cursor-not-allowed"
             />
           </div>
 
+          {/* Booking Date */}
           <div>
-            <label className="block font-semibold" htmlFor="booking-date">
+            <label
+              className="block font-semibold text-teal-300"
+              htmlFor="booking-date"
+            >
               Booking Date
             </label>
             <input
@@ -111,14 +122,17 @@ function BookingModal({ court, onClose }) {
               type="date"
               value={bookingDate}
               onChange={(e) => setBookingDate(e.target.value)}
-              className="w-full rounded px-3 py-2 text-black"
+              className="w-full rounded px-3 py-2 bg-white text-black focus:ring-2 focus:ring-orange-400 outline-none"
               min={new Date().toISOString().split("T")[0]}
               required
             />
           </div>
 
+          {/* Slots */}
           <div>
-            <label className="block font-semibold mb-1">Select Slots</label>
+            <label className="block font-semibold mb-1 text-teal-300">
+              Select Slots
+            </label>
             <div className="flex flex-wrap gap-2">
               {court.slots.map((slot) => {
                 const selected = selectedSlots.includes(slot);
@@ -127,10 +141,10 @@ function BookingModal({ court, onClose }) {
                     key={slot}
                     type="button"
                     onClick={() => toggleSlot(slot)}
-                    className={`px-3 py-1 rounded border ${
+                    className={`px-3 py-1 rounded border transition-all duration-150 ${
                       selected
                         ? "bg-orange-600 border-orange-600 text-white"
-                        : "bg-gray-700 border-gray-600 text-gray-300"
+                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
                     }`}
                   >
                     {slot}
@@ -140,23 +154,26 @@ function BookingModal({ court, onClose }) {
             </div>
           </div>
 
-          <p className="font-semibold">
-            Total Price: <span className="text-orange-400">${totalPrice}</span>
+          {/* Total Price */}
+          <p className="font-semibold text-lg">
+            Total Price:{" "}
+            <span className="text-yellow-400 font-bold">${totalPrice}</span>
           </p>
 
+          {/* Actions */}
           <div className="flex justify-end gap-3 mt-6">
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700"
+              className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-2 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+              className="px-6 py-2 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold transition"
             >
               {submitting ? "Booking..." : "Submit Booking"}
             </button>
