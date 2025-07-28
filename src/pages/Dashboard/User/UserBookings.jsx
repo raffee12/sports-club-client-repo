@@ -77,11 +77,11 @@ export default function UserBookings() {
         }
       } catch (error) {
         console.error("Cancel booking failed:", error);
-        Swal.fire(
-          "Error",
-          "Failed to cancel booking. Please try again.",
-          "error"
-        );
+        // Swal.fire(
+        //   "Error",
+        //   "Failed to cancel booking. Please try again.",
+        //   "error"
+        // );
       } finally {
         setCancelingId(null);
       }

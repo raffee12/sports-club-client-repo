@@ -19,6 +19,7 @@ import MemberRoute from "./MemberRoute.jsx";
 import DashboardRedirect from "../components/DashboardRedirect.jsx";
 
 // ✅ User Dashboard Pages
+import UserDashboard from "../pages/Dashboard/User/UserDashboard.jsx"; // ✅ ADDED
 import UserProfile from "../pages/Dashboard/User/UserProfile.jsx";
 import UserBookings from "../pages/Dashboard/User/UserBookings.jsx";
 import UserAnnouncements from "../pages/Dashboard/User/UserAnnouncements.jsx";
@@ -58,7 +59,7 @@ const router = createBrowserRouter([
     ],
   },
 
-  // 🧭 Dashboard with role-based redirect
+  // 🧭 Dashboard (protected layout)
   {
     path: "/dashboard",
     element: (
@@ -68,10 +69,18 @@ const router = createBrowserRouter([
     ),
     errorElement: <ErrorPage />,
     children: [
-      // 🔁 Smart redirect to /dashboard/[role]/...
+      // 🔁 Smart redirect to role-specific dashboard
       { index: true, element: <DashboardRedirect /> },
 
-      // 🟡 User Routes (PrivateRoute)
+      // ✅ User Routes
+      {
+        path: "user",
+        element: (
+          <PrivateRoute>
+            <UserDashboard />
+          </PrivateRoute>
+        ),
+      },
       {
         path: "user/profile",
         element: (
@@ -97,7 +106,7 @@ const router = createBrowserRouter([
         ),
       },
 
-      // 🔴 Admin Routes (AdminRoute)
+      // ✅ Admin Routes
       {
         path: "admin/profile",
         element: (
@@ -171,7 +180,7 @@ const router = createBrowserRouter([
         ),
       },
 
-      // 🟢 Member Routes (MemberRoute)
+      // ✅ Member Routes
       {
         path: "member/profile",
         element: (

@@ -36,7 +36,9 @@ const ManageMembers = () => {
         const res = await axiosSecure.delete(`/members/${id}`);
         console.log("Delete result:", res.data);
         Swal.fire("Deleted!", "Member has been removed.", "success");
-        refetch();
+
+        // Use queryClient to invalidate and refetch members
+        queryClient.invalidateQueries(["members"]);
       } catch (error) {
         console.error("Delete failed:", error.response?.data || error.message);
         Swal.fire(

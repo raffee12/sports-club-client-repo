@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import { HiOutlineMenuAlt3 } from "react-icons/hi";
 
 // Sidebar components
-import UserDashboard from "../../pages/Dashboard/User/UserDashboard";
+import UserSidebar from "../../layouts/DashboardLayout/UserSidebar";
 import MemberSidebar from "../../layouts/DashboardLayout/MemberSidebar";
 import AdminSidebar from "../../layouts/DashboardLayout/AdminSidebar";
 import useUserRole from "../../hooks/useUserRole";
@@ -24,7 +24,7 @@ const DashboardLayout = () => {
   const renderSidebar = () => {
     if (role === "admin") return <AdminSidebar />;
     if (role === "member") return <MemberSidebar />;
-    return <UserDashboard />;
+    return <UserSidebar />;
   };
 
   return (
@@ -63,7 +63,7 @@ const DashboardLayout = () => {
       </div>
 
       {/* Main content (desktop) */}
-      <div className="flex-1 bg-gray-50  hidden lg:block">
+      <div className="flex-1 bg-gray-50 hidden lg:block">
         <Outlet />
       </div>
     </div>

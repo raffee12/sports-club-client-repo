@@ -1,3 +1,4 @@
+// hooks/useUserRole.js
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import Swal from "sweetalert2";
@@ -18,16 +19,16 @@ const useUserRole = () => {
   } = useQuery({
     queryKey: ["userRole", user?.email],
     enabled: !!user?.email && !loading,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0, // always considered stale, can refetch anytime
     cacheTime: 1000 * 60 * 10,
     queryFn: async () => {
-      const encodedEmail = encodeURIComponent(user.email);
-      const res = await axiosSecure.get(`/users/role/${encodedEmail}`);
+      const res = await axiosSecure.get(
+        `/users/role/${encodeURIComponent(user.email)}`
+      );
       return res.data.role;
     },
   });
 
-  // 🔔 Alert and trigger when role becomes 'member'
   useEffect(() => {
     const prevRole = prevRoleRef.current;
     if (prevRole && prevRole !== "member" && role === "member") {
@@ -47,7 +48,7 @@ const useUserRole = () => {
     isAdmin: role === "admin",
     isMember: role === "member",
     isUser: role === "user",
-    refetchRole: refetch,
+    refetchRole: refetch, // ✅ this is the key
     isRoleError: isError,
     roleError: error,
   };
