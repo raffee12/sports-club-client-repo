@@ -55,7 +55,7 @@ function ManageBookingsApproval() {
   const currentBookings = bookings.slice(indexOfFirst, indexOfLast);
 
   return (
-    <div className="max-w-6xl mx-auto p-6 sm:p-8 bg-white rounded-xl border border-gray-200 shadow-lg">
+    <div className="max-w-6xl mt-5 mx-auto p-6 sm:p-8 bg-white rounded-xl border border-gray-200 shadow-lg">
       <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-900 border-b border-gray-300 pb-3 tracking-wide uppercase select-none">
         Manage Bookings Approval
       </h2>

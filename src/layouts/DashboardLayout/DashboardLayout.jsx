@@ -63,7 +63,7 @@ const DashboardLayout = () => {
       </div>
 
       {/* Main content (desktop) */}
-      <div className="flex-1 bg-gray-50 p-4 hidden lg:block">
+      <div className="flex-1 bg-gray-50  hidden lg:block">
         <Outlet />
       </div>
     </div>

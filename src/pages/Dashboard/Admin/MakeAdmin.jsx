@@ -94,7 +94,7 @@ const MakeAdmin = () => {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto bg-gradient-to-br from-[#0f172a] to-[#1e293b] rounded-2xl shadow-xl border border-gray-700">
+    <div className="p-8 mt-5 max-w-5xl mx-auto bg-gradient-to-br from-[#0f172a] to-[#1e293b] rounded-2xl shadow-xl border border-gray-700">
       <h2 className="text-4xl font-extrabold text-yellow-400 mb-8 text-center">
         Make Admin
       </h2>

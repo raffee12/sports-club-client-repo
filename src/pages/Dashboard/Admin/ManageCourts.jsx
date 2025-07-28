@@ -63,12 +63,21 @@ const ManageCourts = () => {
       const formData = new FormData();
       formData.append("image", imageFile);
 
-      // Upload image using plain axios (external service)
-      const imgbbRes = await axios.post(
+      // ✅ Use fetch instead of axios to avoid CORS issue
+      const imgbbRes = await fetch(
         `https://api.imgbb.com/1/upload?key=${imgbbApiKey}`,
-        formData
+        {
+          method: "POST",
+          body: formData,
+        }
       );
-      const imageUrl = imgbbRes.data.data.url;
+
+      if (!imgbbRes.ok) {
+        throw new Error("Image upload failed");
+      }
+
+      const imgbbData = await imgbbRes.json();
+      const imageUrl = imgbbData.data.url;
 
       // Map slots array of objects to array of strings
       const slotsArray = data.slots.map((slot) => slot.time).filter(Boolean);
@@ -99,6 +108,7 @@ const ManageCourts = () => {
       setPreviewUrl("");
       fetchCourts();
     } catch (error) {
+      console.error(error);
       Swal.fire("Error!", "Could not add court", "error");
     }
   };
@@ -168,7 +178,9 @@ const ManageCourts = () => {
 
           {/* Court Category (Sport Type) */}
           <select
-            {...register("category", { required: "Court category is required" })}
+            {...register("category", {
+              required: "Court category is required",
+            })}
             className="select select-bordered w-full bg-white/90 text-gray-900 rounded-xl focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-400 transition"
           >
             <option value="" disabled>
@@ -328,59 +340,71 @@ const ManageCourts = () => {
 
         {/* Courts Table */}
         <div className="bg-white/15 p-7 rounded-3xl shadow-2xl border border-white/30 backdrop-blur-lg">
-          <h3 className="text-2xl font-extrabold mb-6 text-indigo-200 tracking-wide drop-shadow-md">
+          <h3 className="text-2xl font-bold mb-6 text-indigo-200 tracking-wide drop-shadow-md text-center">
             All Courts
           </h3>
-          <div className="overflow-x-auto rounded-lg border border-indigo-600 shadow-inner">
-            <table className="table w-full text-gray-200 text-sm md:text-base">
-              <thead className="bg-indigo-900/90 text-indigo-300">
+          <div className="overflow-x-auto rounded-xl shadow-inner border border-indigo-700">
+            <table className="table w-full text-sm text-gray-100 rounded-xl overflow-hidden">
+              <thead className="bg-indigo-950 text-indigo-300 uppercase text-xs tracking-widest">
                 <tr>
-                  <th className="border border-indigo-700">ID</th>
-                  <th className="border border-indigo-700">Name</th>
-                  <th className="border border-indigo-700">Category</th>
-                  <th className="border border-indigo-700">Type</th>
-                  <th className="border border-indigo-700">Price/Session</th>
-                  <th className="border border-indigo-700">Slots</th>
-                  <th className="border border-indigo-700">Status</th>
-                  <th className="border border-indigo-700">Max Players</th>
-                  <th className="border border-indigo-700">Duration (min)</th>
-                  <th className="border border-indigo-700">Image</th>
-                  <th className="border border-indigo-700 text-center">Actions</th>
+                  <th className="px-4 py-3 text-left">ID</th>
+                  <th className="px-4 py-3 text-left">Name</th>
+                  <th className="px-4 py-3 text-left">Category</th>
+                  <th className="px-4 py-3 text-left">Type</th>
+                  <th className="px-4 py-3 text-left">Price</th>
+                  <th className="px-4 py-3 text-left">Slots</th>
+                  <th className="px-4 py-3 text-left">Status</th>
+                  <th className="px-4 py-3 text-left">Max Players</th>
+                  <th className="px-4 py-3 text-left">Duration</th>
+                  <th className="px-4 py-3 text-left">Image</th>
+                  <th className="px-4 py-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {courts.length > 0 ? (
-                  courts.map((court) => (
+                  courts.map((court, idx) => (
                     <tr
                       key={court._id}
-                      className="hover:bg-indigo-800/40 transition-colors text-gray-900 font-semibold"
+                      className={`${
+                        idx % 2 === 0 ? "bg-indigo-800/20" : "bg-indigo-700/20"
+                      } hover:bg-indigo-900/40 transition-colors`}
                     >
-                      <td className="border border-indigo-700 px-3 py-2">{court.id}</td>
-                      <td className="border border-indigo-700 px-3 py-2">{court.name}</td>
-                      <td className="border border-indigo-700 px-3 py-2 capitalize">{court.category}</td>
-                      <td className="border border-indigo-700 px-3 py-2 capitalize">{court.type}</td>
-                      <td className="border border-indigo-700 px-3 py-2">${court.pricePerSession}</td>
-                      <td className="border border-indigo-700 px-3 py-2 max-w-xs whitespace-normal">
+                      <td className="px-4 py-2 font-medium">{court.id}</td>
+                      <td className="px-4 py-2">{court.name}</td>
+                      <td className="px-4 py-2 capitalize">{court.category}</td>
+                      <td className="px-4 py-2 capitalize">{court.type}</td>
+                      <td className="px-4 py-2">${court.pricePerSession}</td>
+                      <td className="px-4 py-2 max-w-xs whitespace-normal text-sm">
                         {court.slots?.join(", ")}
                       </td>
-                      <td className="border border-indigo-700 px-3 py-2 capitalize">{court.status}</td>
-                      <td className="border border-indigo-700 px-3 py-2">
-                        {court.maxPlayers ?? "—"}
+                      <td className="px-4 py-2 capitalize">
+                        <span
+                          className={`badge ${
+                            court.status === "available"
+                              ? "badge-success"
+                              : court.status === "maintenance"
+                              ? "badge-warning"
+                              : "badge-error"
+                          }`}
+                        >
+                          {court.status}
+                        </span>
                       </td>
-                      <td className="border border-indigo-700 px-3 py-2">{court.sessionDuration}</td>
-                      <td className="border border-indigo-700 px-3 py-2">
+                      <td className="px-4 py-2">{court.maxPlayers ?? "—"}</td>
+                      <td className="px-4 py-2">{court.sessionDuration} min</td>
+                      <td className="px-4 py-2">
                         <img
                           src={court.image}
                           alt={court.name}
-                          className="w-20 h-20 object-cover rounded-xl shadow-md"
+                          className="w-14 h-14 object-cover rounded-md shadow"
                         />
                       </td>
-                      <td className="border border-indigo-700 px-3 py-2 flex justify-center gap-2">
+                      <td className="px-4 py-2 text-center">
                         <button
                           onClick={() => handleDelete(court._id)}
-                          className="btn btn-xs bg-red-600 text-white hover:bg-red-700 rounded-xl shadow-md flex items-center gap-1 transition"
+                          className="btn btn-sm bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded-lg transition-all shadow-md"
                         >
-                          <FaTrash /> Delete
+                          <FaTrash className="mr-1" /> Delete
                         </button>
                       </td>
                     </tr>
@@ -389,7 +413,7 @@ const ManageCourts = () => {
                   <tr>
                     <td
                       colSpan="11"
-                      className="text-center text-indigo-300 py-10 font-semibold"
+                      className="text-center py-10 text-indigo-300 font-semibold"
                     >
                       No courts available.
                     </td>
