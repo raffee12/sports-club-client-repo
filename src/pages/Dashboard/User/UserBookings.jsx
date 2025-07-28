@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 import { FiCalendar, FiClock, FiTag, FiTrash2 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useUserRole from "../../../hooks/useUserRole";
@@ -13,7 +14,6 @@ export default function UserBookings() {
   const axiosSecure = useAxiosSecure();
   const queryClient = useQueryClient();
   const [cancelingId, setCancelingId] = useState(null);
-
   const { role, isRoleLoading, refetch: refetchRole } = useUserRole();
 
   const {
@@ -22,7 +22,7 @@ export default function UserBookings() {
     isError,
     error,
   } = useQuery({
-    queryKey: ["userBookings", user?.email],
+    queryKey: ["userBookings"],
     enabled: !!user?.email,
     queryFn: async () => {
       const res = await axiosSecure.get(`/bookings?userEmail=${user.email}`);
@@ -30,7 +30,6 @@ export default function UserBookings() {
     },
   });
 
-  // Show welcome SweetAlert for members
   useEffect(() => {
     if (role === "member") {
       Swal.fire({
@@ -43,7 +42,6 @@ export default function UserBookings() {
     }
   }, [role]);
 
-  // Cancel handler
   const handleCancel = async (bookingId) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -61,12 +59,12 @@ export default function UserBookings() {
         setCancelingId(bookingId);
         await axiosSecure.delete(`/bookings/${bookingId}`);
 
-        // Immediately update cache without waiting for full refetch
-        queryClient.setQueryData(["userBookings", user.email], (old) =>
+        queryClient.setQueryData(["userBookings"], (old) =>
           old ? old.filter((b) => b._id !== bookingId) : []
         );
 
-        await refetchRole(); // In case this was the last approved booking
+        await refetchRole();
+
         Swal.fire("Cancelled!", "Your booking has been cancelled.", "success");
       } catch {
         Swal.fire("Error", "Failed to cancel booking.", "error");
@@ -149,8 +147,8 @@ export default function UserBookings() {
           </button>
         </div>
       ) : (
-        <div className="flex justify-center">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-screen-xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center px-2">
+          <AnimatePresence>
             {bookings.map((booking) => {
               const bookingDate = booking.date || "";
               const slot =
@@ -159,9 +157,13 @@ export default function UserBookings() {
                   : "No slot";
 
               return (
-                <div
+                <motion.div
                   key={booking._id}
-                  className="relative rounded-xl bg-gradient-to-tr from-white via-teal-50 to-white border border-teal-200 p-5 shadow-md hover:shadow-xl transition-all duration-300"
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full max-w-xs bg-white border border-teal-200 rounded-xl shadow-md p-5 hover:shadow-xl transition-all"
                 >
                   <h3 className="text-xl font-semibold text-indigo-900 mb-2">
                     {booking.courtName}{" "}
@@ -206,7 +208,8 @@ export default function UserBookings() {
                       {booking.status || "unknown"}
                     </span>
 
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => handleCancel(booking._id)}
                       disabled={cancelingId === booking._id}
                       className={`btn btn-xs text-white flex items-center gap-1 ${
@@ -217,12 +220,12 @@ export default function UserBookings() {
                     >
                       <FiTrash2 />
                       {cancelingId === booking._id ? "Cancelling..." : "Cancel"}
-                    </button>
+                    </motion.button>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </AnimatePresence>
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaUsers, FaDoorOpen, FaUserShield } from "react-icons/fa";
+import CountUp from "react-countup";
 import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 
@@ -14,11 +15,10 @@ const AdminProfile = () => {
     totalMembers: 0,
   });
 
-  // ✅ Fetch admin role
   useEffect(() => {
     if (user?.email) {
       axiosSecure
-        .get(`/users/role/${user.email}`) // <-- fixed typo here
+        .get(`/users/role/${user.email}`)
         .then((res) => setRole(res.data.role))
         .catch((err) => {
           console.error("Role fetch failed", err);
@@ -27,7 +27,6 @@ const AdminProfile = () => {
     }
   }, [user, axiosSecure]);
 
-  // ✅ Fetch dashboard stats
   useEffect(() => {
     if (role === "admin") {
       const fetchCounts = async () => {
@@ -50,7 +49,6 @@ const AdminProfile = () => {
     }
   }, [role, axiosSecure]);
 
-  // ✅ Loading State
   if (loading || !user) {
     return (
       <div className="min-h-screen flex justify-center items-center text-white">
@@ -59,7 +57,6 @@ const AdminProfile = () => {
     );
   }
 
-  // ❌ Unauthorized role fallback
   if (role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-800">
@@ -68,7 +65,6 @@ const AdminProfile = () => {
     );
   }
 
-  // ✅ Render Admin Profile
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 py-12 px-4 flex justify-center items-start text-white">
       <div className="w-full max-w-4xl bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/20 shadow-2xl space-y-10">
@@ -89,19 +85,25 @@ const AdminProfile = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           <div className="bg-white/20 rounded-xl p-6 flex flex-col items-center shadow-lg border border-white/30">
             <FaDoorOpen size={48} className="mb-3 text-indigo-400" />
-            <p className="text-3xl font-extrabold">{counts.totalCourts}</p>
+            <p className="text-3xl font-extrabold">
+              <CountUp end={counts.totalCourts} duration={1.5} />
+            </p>
             <p className="text-lg mt-1">Total Courts</p>
           </div>
 
           <div className="bg-white/20 rounded-xl p-6 flex flex-col items-center shadow-lg border border-white/30">
             <FaUsers size={48} className="mb-3 text-indigo-400" />
-            <p className="text-3xl font-extrabold">{counts.totalUsers}</p>
+            <p className="text-3xl font-extrabold">
+              <CountUp end={counts.totalUsers} duration={1.5} />
+            </p>
             <p className="text-lg mt-1">Total Users</p>
           </div>
 
           <div className="bg-white/20 rounded-xl p-6 flex flex-col items-center shadow-lg border border-white/30">
             <FaUserShield size={48} className="mb-3 text-indigo-400" />
-            <p className="text-3xl font-extrabold">{counts.totalMembers}</p>
+            <p className="text-3xl font-extrabold">
+              <CountUp end={counts.totalMembers} duration={1.5} />
+            </p>
             <p className="text-lg mt-1">Total Members</p>
           </div>
         </div>
