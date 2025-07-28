@@ -112,7 +112,7 @@ export default function ApprovedBookings() {
               return (
                 <div
                   key={booking._id}
-                  className="rounded-xl bg-gradient-to-br from-white via-green-50 to-white border border-green-200 p-5 shadow hover:shadow-xl transition flex flex-col justify-center items-center text-center w-full max-w-sm"
+                  className="rounded-xl bg-gradient-to-br from-white via-green-50 to-white border border-green-200 p-6 shadow hover:shadow-xl transition flex flex-col justify-center items-center text-center w-full max-w-md"
                 >
                   <h3 className="text-xl font-bold text-green-900 mb-2">
                     {booking.courtName}
