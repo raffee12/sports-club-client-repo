@@ -8,6 +8,9 @@ import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useUserRole from "../../../hooks/useUserRole";
 
+// Import BecomeMemberButton component
+import BecomeMemberButton from "../../../components/BecomeMemberButton";
+
 export default function UserBookings() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -77,11 +80,6 @@ export default function UserBookings() {
         }
       } catch (error) {
         console.error("Cancel booking failed:", error);
-        // Swal.fire(
-        //   "Error",
-        //   "Failed to cancel booking. Please try again.",
-        //   "error"
-        // );
       } finally {
         setCancelingId(null);
       }
@@ -113,36 +111,10 @@ export default function UserBookings() {
         My Court Bookings
       </h2>
 
+      {/* Show BecomeMemberButton only if user has approved bookings and is not member yet */}
       {bookings.some((b) => b.status === "approved") && role === "user" && (
-        <div className="text-center">
-          <button
-            onClick={async () => {
-              try {
-                const res = await axiosSecure.post("/members", {
-                  email: user.email,
-                  name: user.displayName,
-                  image: user.photoURL,
-                  joinDate: new Date(),
-                });
-
-                if (res.data.insertedId || res.data.success) {
-                  await refetchRole();
-                  Swal.fire({
-                    icon: "success",
-                    title: "Membership Confirmed!",
-                    text: "You're now a club member.",
-                    timer: 2000,
-                    showConfirmButton: false,
-                  });
-                }
-              } catch {
-                Swal.fire("Error", "Could not update membership.", "error");
-              }
-            }}
-            className="btn btn-success text-white mt-2 hover:scale-105 transition-all duration-300"
-          >
-            🎉 Join the Club Now
-          </button>
+        <div className="max-w-xs mx-auto">
+          <BecomeMemberButton />
         </div>
       )}
 
