@@ -22,7 +22,7 @@ const BecomeMemberButton = () => {
 
       if (response.status === 200 || response.status === 201) {
         await refetchRole(); // ✅ Force role update from server
-        navigate("/dashboard/member"); // ✅ Navigate to correct dashboard
+        navigate("/dashboard/member/profile"); // ✅ Navigate to correct dashboard
       } else {
         throw new Error("Membership creation failed");
       }
