@@ -31,6 +31,18 @@ export default function MemberSidebar() {
         <ul className="menu p-4 w-64 min-h-full bg-[#001f45] text-white space-y-2">
           <li>
             <NavLink
+              to="/"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-orange-400 font-semibold"
+                  : "text-white hover:text-orange-300"
+              }
+            >
+              <FaUserCircle /> Home
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
               to="/dashboard/member/profile"
               className={({ isActive }) =>
                 isActive

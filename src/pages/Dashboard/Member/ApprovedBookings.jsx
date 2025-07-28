@@ -86,7 +86,7 @@ export default function ApprovedBookings() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {bookings.map((booking) => {
             const bookingDate = booking.date
               ? new Date(booking.date).toLocaleDateString("en-US", {
@@ -103,7 +103,7 @@ export default function ApprovedBookings() {
             return (
               <div
                 key={booking._id}
-                className="rounded-xl bg-gradient-to-br from-white via-green-50 to-white border border-green-200 p-5 shadow hover:shadow-xl transition"
+                className="rounded-xl bg-gradient-to-br from-white via-green-50 to-white border border-green-200 p-5 shadow hover:shadow-xl transition flex flex-col justify-center items-center text-center"
               >
                 <h3 className="text-xl font-bold text-green-900 mb-2">
                   {booking.courtName}
@@ -113,21 +113,21 @@ export default function ApprovedBookings() {
                 </h3>
 
                 <div className="text-gray-700 space-y-1 text-sm">
-                  <p className="flex items-center gap-2">
+                  <p className="flex items-center justify-center gap-2">
                     <FiCalendar className="text-green-600" />
                     {bookingDate}
                   </p>
-                  <p className="flex items-center gap-2">
+                  <p className="flex items-center justify-center gap-2">
                     <FiClock className="text-green-500" />
                     {slots}
                   </p>
-                  <p className="flex items-center gap-2">
+                  <p className="flex items-center justify-center gap-2">
                     <FiTag className="text-green-400" />
                     ${booking.price?.toFixed(2) || "N/A"}
                   </p>
                 </div>
 
-                <div className="mt-4 flex justify-between items-center flex-wrap gap-2">
+                <div className="mt-4 flex justify-center items-center flex-wrap gap-4">
                   <button
                     onClick={() => handlePayment(booking)}
                     className="btn btn-sm btn-success text-white flex items-center gap-2"
