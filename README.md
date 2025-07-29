@@ -1,12 +1,45 @@
-# React + Vite
+# Your Site Name 🏸Sports Club
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Sports Club** is a full-stack web application designed to manage sports court bookings with secure authentication, role-based dashboards, online payments, and admin control. Built with **React**, **Firebase**, **Express**, **MongoDB**, and **Stripe**, this platform ensures a seamless and modern booking experience for both users and administrators.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🔗 Live Website
 
-## Expanding the ESLint configuration
+👉 https://assignment-12-finale.web.app/
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🔐 Admin Credentials
+
+> Use the following credentials to log in as an admin:
+
+- **Email:** `cat@dog.com`
+- **Password:** `cat@dog.com`
+
+---
+
+## 🚀 Features
+
+1. 🔒 **User Authentication** with Firebase (Google Sign-In & email/password)
+2. 👤 **Role-based Dashboard** (Admin, Member, User)
+3. 🏟️ **Court Booking System** – Select date, slots, and courts
+4. 💳 **Stripe Payment Integration** for secure transactions
+5. ✅ **Manage Bookings** – Users can view and manage confirmed bookings
+6. 🛡️ **Admin Panel** – Approve members, manage courts, handle payments
+7. 📅 **Real-time Availability** – Prevents double bookings
+8. 🔍 **Search & Filter** – Search bookings by title or status
+9. 📈 **Statistics Dashboard** – Visual analytics for admins
+10. 📬 **Join Club Request System** – Users can request membership
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** React + React Router + DaisyUI + React Query + Axios
+- **Backend:** Express.js + MongoDB + Firebase Admin SDK
+- **Auth:** Firebase Authentication
+- **Payments:** Stripe Checkout
+- **Hosting:** Firebase (Frontend),Vercel(Backend)
+
+---

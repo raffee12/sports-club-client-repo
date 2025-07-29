@@ -17,7 +17,9 @@ const ConfirmedBookings = () => {
         setLoading(true);
         setError(null);
         const res = await axiosSecure.get(`/bookings?userEmail=${user.email}`);
-        const confirmed = res.data.filter((b) => b.status === "confirmed");
+        const confirmed = res.data.filter(
+          (b) => b.status === "confirmed" || b.isPaid === true
+        );
         setBookings(confirmed);
       } catch (err) {
         console.error("Failed to fetch confirmed bookings:", err);
@@ -30,54 +32,63 @@ const ConfirmedBookings = () => {
     fetchConfirmedBookings();
   }, [user, axiosSecure]);
 
-  if (loading) return <p>Loading confirmed bookings...</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (!bookings.length) return <p>No confirmed bookings found.</p>;
+  if (loading)
+    return (
+      <div className="text-center text-white mt-10">Loading confirmed bookings...</div>
+    );
+
+  if (error)
+    return (
+      <p className="text-center text-red-500 font-medium mt-4">{error}</p>
+    );
+
+  if (!bookings.length)
+    return (
+      <p className="text-center text-gray-300 mt-6">No confirmed bookings found.</p>
+    );
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4 text-green-700 text-center">
-        Confirmed Bookings
-      </h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-green-100 text-green-800 uppercase text-sm">
-            <tr>
-              <th className="p-2 border border-gray-300 text-left">
-                Booking ID
-              </th>
-              <th className="p-2 border border-gray-300 text-left">Court</th>
-              <th className="p-2 border border-gray-300 text-left">Date</th>
-              <th className="p-2 border border-gray-300 text-left">Slots</th>
-              <th className="p-2 border border-gray-300 text-left">Price</th>
-              <th className="p-2 border border-gray-300 text-left">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.map((booking) => (
-              <tr key={booking._id} className="hover:bg-green-50">
-                <td className="p-2 border border-gray-300">{booking._id}</td>
-                <td className="p-2 border border-gray-300">
-                  {booking.courtName || booking.courtId}
-                </td>
-                <td className="p-2 border border-gray-300">
-                  {new Date(booking.date).toLocaleDateString()}
-                </td>
-                <td className="p-2 border border-gray-300">
-                  {Array.isArray(booking.slots)
-                    ? booking.slots.join(", ")
-                    : booking.slots}
-                </td>
-                <td className="p-2 border border-gray-300">
-                  ${booking.price?.toFixed(2) || "N/A"}
-                </td>
-                <td className="p-2 border border-gray-300 capitalize text-green-600 font-semibold">
-                  {booking.status}
-                </td>
+    <div className="min-h-screen bg-gradient-to-br from-[#001f45] to-[#0a2647] p-4 flex justify-center items-start">
+      <div className="w-full max-w-6xl bg-[#002b60] text-white rounded-2xl shadow-2xl p-6">
+        <h2 className="text-3xl font-semibold text-center mb-6">Confirmed Bookings</h2>
+        <div className="overflow-x-auto rounded-lg border border-[#0151ad]">
+          <table className="min-w-full">
+            <thead className="bg-[#014c8c] text-white uppercase text-sm">
+              <tr>
+                <th className="p-3 text-left">Booking ID</th>
+                <th className="p-3 text-left">Court</th>
+                <th className="p-3 text-left">Date</th>
+                <th className="p-3 text-left">Slots</th>
+                <th className="p-3 text-left">Price</th>
+                <th className="p-3 text-left">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {bookings.map((booking) => (
+                <tr key={booking._id} className="hover:bg-[#01447f] transition duration-200">
+                  <td className="p-3 font-mono text-xs">{booking._id}</td>
+                  <td className="p-3">{booking.courtName || booking.courtId}</td>
+                  <td className="p-3">
+                    {booking.date
+                      ? new Date(booking.date).toLocaleDateString()
+                      : "N/A"}
+                  </td>
+                  <td className="p-3 text-sm">
+                    {Array.isArray(booking.slots)
+                      ? booking.slots.join(", ")
+                      : booking.slots || "N/A"}
+                  </td>
+                  <td className="p-3 text-green-300 font-semibold">
+                    ${booking.price?.toFixed(2) || "0.00"}
+                  </td>
+                  <td className="p-3 capitalize font-medium text-yellow-300">
+                    {booking.status || (booking.isPaid ? "paid" : "pending")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

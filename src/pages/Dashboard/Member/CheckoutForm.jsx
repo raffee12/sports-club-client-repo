@@ -24,16 +24,14 @@ const CheckoutForm = () => {
   const [discount, setDiscount] = useState(0); // %
   const [finalPrice, setFinalPrice] = useState(originalPrice);
 
-  // Debug logs to check data availability
   useEffect(() => {
     console.log("User:", user);
     console.log("Booking:", booking);
   }, [user, booking]);
 
-  // === Handle Coupon Apply ===
   const handleApplyCoupon = async () => {
     try {
-      const res = await axiosSecure.get("/coupons"); // make sure /coupons returns valid list
+      const res = await axiosSecure.get("/coupons");
       const valid = res.data.find(
         (c) => c.code === coupon && new Date(c.expiresAt) >= new Date()
       );
@@ -51,7 +49,6 @@ const CheckoutForm = () => {
     }
   };
 
-  // === Generate client secret whenever finalPrice changes ===
   useEffect(() => {
     if (finalPrice > 0) {
       axiosSecure
@@ -73,6 +70,12 @@ const CheckoutForm = () => {
 
     setProcessing(true);
     setError("");
+
+    if (!booking?._id) {
+      setError("Missing booking reference");
+      setProcessing(false);
+      return;
+    }
 
     try {
       const { paymentIntent, error: confirmError } =
@@ -106,10 +109,14 @@ const CheckoutForm = () => {
           discountedPrice: finalPrice,
           discountApplied: discount,
           paidAt: new Date(),
+
+          // ✅ Required by backend
+          bookingId: booking?._id,
         };
 
         const res = await axiosSecure.post("/payments", paymentData);
-        if (res.data.insertedId) {
+
+        if (res.data?.paymentResult?.insertedId || res.data?.paymentResult?.acknowledged) {
           setTransactionId(paymentIntent.id);
           Swal.fire({
             icon: "success",
@@ -119,6 +126,8 @@ const CheckoutForm = () => {
           }).then(() => {
             navigate("/dashboard/member/confirmed");
           });
+        } else {
+          setError("Payment saved, but booking not updated.");
         }
       }
     } catch (err) {
@@ -135,7 +144,6 @@ const CheckoutForm = () => {
         Secure Payment
       </h2>
 
-      {/* Coupon input + Apply button */}
       <div className="flex gap-2 mb-4">
         <input
           type="text"
@@ -151,7 +159,6 @@ const CheckoutForm = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5 text-white">
-        {/* Readonly fields */}
         <div className="grid gap-3">
           <input
             type="text"
@@ -185,7 +192,6 @@ const CheckoutForm = () => {
           />
         </div>
 
-        {/* Card input */}
         <div className="p-3 rounded-lg bg-white shadow">
           <CardElement
             options={{
@@ -201,7 +207,6 @@ const CheckoutForm = () => {
           />
         </div>
 
-        {/* Submit button */}
         <button
           type="submit"
           disabled={!stripe || !clientSecret || processing}
@@ -214,7 +219,6 @@ const CheckoutForm = () => {
           {processing ? "Processing..." : `Pay $${finalPrice.toFixed(2)}`}
         </button>
 
-        {/* Error & Success messages */}
         {error && <p className="text-sm text-red-400 text-center">{error}</p>}
         {transactionId && (
           <p className="text-sm text-green-400 text-center mt-2">

@@ -81,7 +81,7 @@ export default function ApprovedBookings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 px-4">
       <h2 className="text-4xl font-bold text-center text-green-700">
         Approved Bookings
       </h2>
@@ -94,74 +94,93 @@ export default function ApprovedBookings() {
           </p>
         </div>
       ) : (
-        <div className="flex justify-center">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center max-w-7xl">
-            {bookings.map((booking) => {
-              const bookingDate = booking.date
-                ? new Date(booking.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })
-                : "No date";
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          {bookings.map((booking) => {
+            const bookingDate = booking.date
+              ? new Date(booking.date).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              : "No date";
 
-              const slots = Array.isArray(booking.slots)
-                ? booking.slots.join(", ")
-                : "No slot";
+            const slots = Array.isArray(booking.slots)
+              ? booking.slots.join(", ")
+              : "No slot";
 
-              return (
-                <div
-                  key={booking._id}
-                  className="rounded-xl bg-gradient-to-br from-white via-green-50 to-white border border-green-200 p-6 shadow hover:shadow-xl transition flex flex-col justify-center items-center text-center w-full max-w-md"
-                >
-                  <h3 className="text-xl font-bold text-green-900 mb-2">
-                    {booking.courtName}
-                    <span className="ml-1 text-sm text-gray-500">
-                      ({booking.courtType})
-                    </span>
-                  </h3>
-
-                  <div className="text-gray-700 space-y-1 text-sm">
-                    <p className="flex items-center justify-center gap-2">
-                      <FiCalendar className="text-green-600" />
-                      {bookingDate}
-                    </p>
-                    <p className="flex items-center justify-center gap-2">
-                      <FiClock className="text-green-500" />
-                      {slots}
-                    </p>
-                    <p className="flex items-center justify-center gap-2">
-                      <FiTag className="text-green-400" />$
-                      {booking.price?.toFixed(2) || "N/A"}
-                    </p>
+            return (
+              <div
+                key={booking._id}
+                className="relative bg-white border border-green-100 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300"
+              >
+                {/* PAID Badge */}
+                {booking.isPaid && (
+                  <div className="absolute top-3 right-3 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+                    PAID
                   </div>
+                )}
 
-                  <div className="mt-4 flex justify-center items-center flex-wrap gap-4">
+                <h3 className="text-xl font-bold text-green-900">
+                  {booking.courtName}
+                  <span className="ml-1 text-sm text-gray-500">
+                    ({booking.courtType})
+                  </span>
+                </h3>
+
+                <div className="mt-3 space-y-2 text-sm text-gray-700">
+                  <p className="flex items-center justify-center gap-2">
+                    <FiCalendar className="text-green-600" />
+                    <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs">
+                      {bookingDate}
+                    </span>
+                  </p>
+                  <p className="flex items-center justify-center gap-2">
+                    <FiClock className="text-green-500" />
+                    <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs">
+                      {slots}
+                    </span>
+                  </p>
+                  <p className="flex items-center justify-center gap-2">
+                    <FiTag className="text-green-400" />
+                    <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
+                      ${booking.price?.toFixed(2) || "N/A"}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="mt-6 flex flex-wrap justify-center gap-4 w-full">
+                  {booking.isPaid ? (
+                    <button
+                      disabled
+                      className="btn btn-sm btn-outline btn-success text-green-600 w-28 cursor-default"
+                    >
+                      <FiDollarSign />
+                      Paid
+                    </button>
+                  ) : (
                     <button
                       onClick={() => handlePayment(booking)}
-                      className="btn btn-sm btn-success text-white flex items-center gap-2"
+                      className="btn btn-sm btn-success text-white flex items-center gap-2 w-28"
                     >
                       <FiDollarSign />
                       Pay Now
                     </button>
+                  )}
 
-                    <button
-                      onClick={() => handleCancel(booking._id)}
-                      disabled={processingId === booking._id}
-                      className={`btn btn-sm btn-error text-white flex items-center gap-2 ${
-                        processingId === booking._id ? "btn-disabled" : ""
-                      }`}
-                    >
-                      <FiTrash2 />
-                      {processingId === booking._id
-                        ? "Cancelling..."
-                        : "Cancel"}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleCancel(booking._id)}
+                    disabled={processingId === booking._id}
+                    className={`btn btn-sm btn-error text-white flex items-center gap-2 w-28 ${
+                      processingId === booking._id ? "btn-disabled" : ""
+                    }`}
+                  >
+                    <FiTrash2 />
+                    {processingId === booking._id ? "Cancelling..." : "Cancel"}
+                  </button>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

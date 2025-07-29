@@ -2,127 +2,125 @@ import React, { useEffect, useState } from "react";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
 
-export default function PaymentPage() {
+const PaymentHistory = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const [payments, setPayments] = useState([]);
-  const [view, setView] = useState("table"); // table | card
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState("table");
 
   useEffect(() => {
-    if (user?.email) {
-      axiosSecure
-        .get(`/payments/user?email=${user.email}`)
-        .then((res) => setPayments(res.data))
-        .catch((err) => console.error(err));
-    }
+    if (!user?.email) return;
+
+    const fetchPayments = async () => {
+      try {
+        const res = await axiosSecure.get(`/payments/user/${user.email}`);
+        setPayments(res.data || []);
+      } catch (err) {
+        console.error("Error fetching payments:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPayments();
   }, [user, axiosSecure]);
 
-  const toggleView = () => {
-    setView((prev) => (prev === "table" ? "card" : "table"));
-  };
+  if (loading)
+    return <p className="text-center text-white">Loading payment history...</p>;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#001f45] to-[#003f73] px-4 py-10">
-      <div className="w-full max-w-6xl bg-[#002b5c] text-white p-6 rounded-2xl shadow-2xl">
-        <div className="flex flex-col md:flex-row md:justify-between items-center mb-6 gap-4">
-          <h2 className="text-3xl font-semibold text-center md:text-left">
-            Payment History
-          </h2>
+    <div className="p-4 min-h-screen flex justify-center items-center bg-gradient-to-b from-[#001f45] to-[#0a2647]">
+      <div className="w-full max-w-6xl bg-[#002b60] text-white rounded-2xl shadow-2xl p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-3xl font-semibold">Payment History</h2>
           <button
-            onClick={toggleView}
-            className="btn btn-sm bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg px-4"
+            onClick={() => setView(view === "table" ? "card" : "table")}
+            className="btn btn-outline btn-sm text-white border-white"
           >
-            Switch to {view === "table" ? "Card" : "Table"} View
+            {view === "table" ? "Card View" : "Table View"}
           </button>
         </div>
 
-        {/* Table View */}
-        {view === "table" ? (
+        {payments.length === 0 ? (
+          <p className="text-center text-gray-300">No payments found.</p>
+        ) : view === "table" ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full table-auto border border-[#004f88] rounded-lg text-sm">
-              <thead className="bg-[#00325a] text-white uppercase text-sm">
+            <table className="min-w-full border border-gray-500">
+              <thead className="bg-[#01376f] text-white">
                 <tr>
-                  <th className="px-4 py-3 text-left min-w-[150px]">Email</th>
-                  <th className="px-4 py-3 text-left min-w-[130px]">
-                    Court Type
-                  </th>
-                  <th className="px-4 py-3 text-left min-w-[200px]">Slots</th>
-                  <th className="px-4 py-3 text-left min-w-[100px]">Price</th>
-                  <th className="px-4 py-3 text-left min-w-[120px]">Date</th>
-                  <th className="px-4 py-3 text-left min-w-[100px]">Status</th>
+                  <th className="p-3 text-left">Transaction ID</th>
+                  <th className="p-3 text-left">Court</th>
+                  <th className="p-3 text-left">Date</th>
+                  <th className="p-3 text-left">Slots</th>
+                  <th className="p-3 text-left">Paid</th>
+                  <th className="p-3 text-left">Discount</th>
+                  <th className="p-3 text-left">Method</th>
                 </tr>
               </thead>
               <tbody>
-                {payments.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="text-center py-6 text-gray-300">
-                      No payments found.
+                {payments.map((p) => (
+                  <tr key={p._id} className="hover:bg-[#01447f]">
+                    <td className="p-3 font-mono text-sm">{p.transactionId}</td>
+                    <td className="p-3">{p.courtName || "N/A"}</td>
+                    <td className="p-3">
+                      {new Date(p.date).toLocaleDateString()}
+                    </td>
+                    <td className="p-3">{p.slots?.join(", ") || "N/A"}</td>
+                    <td className="p-3 font-bold text-green-300">
+                      ${p.discountedPrice?.toFixed(2)}
+                    </td>
+                    <td className="p-3 text-yellow-300">
+                      {p.discountApplied ? `${p.discountApplied}%` : "—"}
+                    </td>
+                    <td className="p-3 capitalize">
+                      {p.paymentMethod?.join(", ")}
                     </td>
                   </tr>
-                ) : (
-                  payments.map((payment) => (
-                    <tr
-                      key={payment._id}
-                      className="border-t border-[#004f88] hover:bg-[#003d6b] transition-all"
-                    >
-                      <td className="px-4 py-3">{payment.email}</td>
-                      <td className="px-4 py-3 capitalize">
-                        {payment.courtType}
-                      </td>
-                      <td className="px-4 py-3">
-                        {payment.slots?.join(", ") || "-"}
-                      </td>
-                      <td className="px-4 py-3">${payment.price}</td>
-                      <td className="px-4 py-3">{payment.date}</td>
-                      <td className="px-4 py-3 capitalize">{payment.status}</td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         ) : (
-          // Card View
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {payments.length === 0 ? (
-              <p className="text-gray-300 col-span-full text-center">
-                No payments found.
-              </p>
-            ) : (
-              payments.map((payment) => (
-                <div
-                  key={payment._id}
-                  className="bg-[#003f73] rounded-xl p-6 shadow-md text-white space-y-2"
-                >
-                  <h3 className="text-xl font-semibold text-orange-400">
-                    {payment.courtType}
-                  </h3>
-                  <p>
-                    <span className="font-semibold text-gray-300">Email:</span>{" "}
-                    {payment.email}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-300">Slots:</span>{" "}
-                    {payment.slots?.join(", ") || "-"}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-300">Price:</span>{" "}
-                    ${payment.price}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-300">Date:</span>{" "}
-                    {payment.date}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-300">Status:</span>{" "}
-                    {payment.status}
-                  </p>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {payments.map((p) => (
+              <div
+                key={p._id}
+                className="bg-[#003b80] border border-[#0151ad] p-4 rounded-xl shadow-md space-y-2"
+              >
+                <p className="text-sm text-gray-300">Transaction</p>
+                <p className="font-mono text-sm truncate">{p.transactionId}</p>
+
+                <div className="grid grid-cols-2 text-sm text-gray-100">
+                  <span className="font-semibold">Court:</span>
+                  <span>{p.courtName}</span>
+
+                  <span className="font-semibold">Date:</span>
+                  <span>{new Date(p.date).toLocaleDateString()}</span>
+
+                  <span className="font-semibold">Slots:</span>
+                  <span>{p.slots?.join(", ") || "N/A"}</span>
+
+                  <span className="font-semibold">Paid:</span>
+                  <span className="text-green-300">
+                    ${p.discountedPrice?.toFixed(2)}
+                  </span>
+
+                  <span className="font-semibold">Discount:</span>
+                  <span>
+                    {p.discountApplied ? `${p.discountApplied}%` : "—"}
+                  </span>
+
+                  <span className="font-semibold">Method:</span>
+                  <span>{p.paymentMethod?.join(", ")}</span>
                 </div>
-              ))
-            )}
+              </div>
+            ))}
           </div>
         )}
       </div>
     </div>
   );
-}
+};
+
+export default PaymentHistory;

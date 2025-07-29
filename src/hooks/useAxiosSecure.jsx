@@ -45,5 +45,4 @@ export default function useAxiosSecure() {
   }, [logOut, navigate]);
 
   return axiosSecure;
-
 }

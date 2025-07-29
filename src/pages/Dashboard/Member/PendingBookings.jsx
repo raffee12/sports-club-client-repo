@@ -69,78 +69,80 @@ export default function PendingBookings() {
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-center text-indigo-900">
-        Pending Bookings
-      </h2>
+    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gray-50">
+      <div className="w-full max-w-7xl space-y-6">
+        <h2 className="text-3xl font-bold text-center text-indigo-900">
+          Pending Bookings
+        </h2>
 
-      {bookings.length === 0 ? (
-        <div className="text-center text-gray-600 bg-gray-50 p-8 rounded-xl shadow">
-          <p className="text-lg">No pending bookings at the moment.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {bookings.map((booking) => {
-            const bookingDate = booking.date || "";
-            const slot =
-              Array.isArray(booking.slots) && booking.slots.length > 0
-                ? booking.slots.join(", ")
-                : "No slot";
+        {bookings.length === 0 ? (
+          <div className="text-center text-gray-600 bg-white p-8 rounded-xl shadow">
+            <p className="text-lg">No pending bookings at the moment.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {bookings.map((booking) => {
+              const bookingDate = booking.date || "";
+              const slot =
+                Array.isArray(booking.slots) && booking.slots.length > 0
+                  ? booking.slots.join(", ")
+                  : "No slot";
 
-            return (
-              <div
-                key={booking._id}
-                className="rounded-xl bg-white border border-gray-200 p-5 shadow hover:shadow-lg transition-all"
-              >
-                <h3 className="text-xl font-semibold text-indigo-800 mb-2">
-                  {booking.courtName}
-                  <span className="ml-2 text-sm text-gray-500">
-                    ({booking.courtType})
-                  </span>
-                </h3>
+              return (
+                <div
+                  key={booking._id}
+                  className="rounded-xl bg-white border border-gray-200 p-5 shadow hover:shadow-lg transition-all"
+                >
+                  <h3 className="text-xl font-semibold text-indigo-800 mb-2">
+                    {booking.courtName}
+                    <span className="ml-2 text-sm text-gray-500">
+                      ({booking.courtType})
+                    </span>
+                  </h3>
 
-                <div className="text-gray-800 space-y-2 text-sm">
-                  <p className="flex items-center gap-2">
-                    <FiCalendar className="text-indigo-500" />
-                    {new Date(bookingDate).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <FiClock className="text-teal-500" />
-                    {slot}
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <FiTag className="text-green-600" />
-                    ${booking.price?.toFixed(2)}
-                  </p>
+                  <div className="text-gray-800 space-y-2 text-sm">
+                    <p className="flex items-center gap-2">
+                      <FiCalendar className="text-indigo-500" />
+                      {new Date(bookingDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <FiClock className="text-teal-500" />
+                      {slot}
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <FiTag className="text-green-600" />$
+                      {booking.price?.toFixed(2)}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex justify-between items-center">
+                    <span className="badge bg-yellow-100 text-yellow-800 border-0">
+                      Pending
+                    </span>
+
+                    <button
+                      onClick={() => handleCancel(booking._id)}
+                      disabled={cancelingId === booking._id}
+                      className={`btn btn-sm flex gap-1 items-center text-white ${
+                        cancelingId === booking._id
+                          ? "btn-disabled"
+                          : "btn-error hover:scale-105"
+                      }`}
+                    >
+                      <FiTrash2 />
+                      {cancelingId === booking._id ? "Cancelling..." : "Cancel"}
+                    </button>
+                  </div>
                 </div>
-
-                <div className="mt-4 flex justify-between items-center">
-                  <span className="badge bg-yellow-100 text-yellow-800 border-0">
-                    Pending
-                  </span>
-
-                  <button
-                    onClick={() => handleCancel(booking._id)}
-                    disabled={cancelingId === booking._id}
-                    className={`btn btn-sm flex gap-1 items-center text-white ${
-                      cancelingId === booking._id
-                        ? "btn-disabled"
-                        : "btn-error hover:scale-105"
-                    }`}
-                  >
-                    <FiTrash2 />
-                    {cancelingId === booking._id ? "Cancelling..." : "Cancel"}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

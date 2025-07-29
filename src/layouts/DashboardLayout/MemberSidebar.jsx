@@ -119,7 +119,7 @@ export default function MemberSidebar() {
             </NavLink>
           </li>
 
-          <li>
+          {/* <li>
             <NavLink
               to="/dashboard/member/announcements"
               className={({ isActive }) =>
@@ -130,7 +130,7 @@ export default function MemberSidebar() {
             >
               <FaBullhorn /> Announcements
             </NavLink>
-          </li>
+          </li> */}
         </ul>
       </div>
     </div>
