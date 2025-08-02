@@ -42,7 +42,6 @@ import ApprovedBookings from "../pages/Dashboard/Member/ApprovedBookings.jsx";
 import ConfirmedBookings from "../pages/Dashboard/Member/ConfirmedBookings.jsx";
 import PaymentPage from "../pages/Dashboard/Member/PaymentPage.jsx";
 import PaymentHistory from "../pages/Dashboard/Member/PaymentHistory.jsx";
-import MemberAnnouncements from "../pages/Dashboard/Member/MemberAnnouncements.jsx";
 
 const router = createBrowserRouter([
   // 🌐 Public Site
@@ -233,7 +232,7 @@ const router = createBrowserRouter([
         path: "member/announcements",
         element: (
           <MemberRoute>
-            <MemberAnnouncements />
+            <UserAnnouncements />
           </MemberRoute>
         ),
       },

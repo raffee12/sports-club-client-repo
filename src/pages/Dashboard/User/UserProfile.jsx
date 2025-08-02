@@ -1,8 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import useAuth from "../../../hooks/useAuth";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
 
 export default function UserProfile() {
   const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.email) {
+      axiosSecure
+        .get(`/users/${user.email}`)
+        .then((res) => {
+          setUserData(res.data);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    }
+  }, [user?.email, axiosSecure]);
 
   if (!user) {
     return (
@@ -12,9 +28,25 @@ export default function UserProfile() {
     );
   }
 
-  // ✅ Use displayName and photoURL instead of user.name and user.photo
-  const photo = user.photoURL || "/images/default-profile.png";
-  const name = user.displayName || "Anonymous";
+  if (loading) {
+    return (
+      <p className="text-center text-gray-400 italic mt-20 text-lg">
+        Loading profile...
+      </p>
+    );
+  }
+
+  const photo =
+    userData?.photo || user.photoURL || "/images/default-profile.png";
+  const name = userData?.name || user.displayName || "Anonymous";
+  const email = userData?.email || user.email || "Unknown";
+  const createdAt = userData?.createdAt
+    ? new Date(userData.createdAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "N/A";
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-gradient-to-tr from-[#001f45] via-[#002d6a] to-[#003f90] px-6 py-10">
@@ -29,16 +61,18 @@ export default function UserProfile() {
             alt="Profile"
             className="w-32 h-32 rounded-full border-4 border-[#001f45] shadow-xl object-cover transition-transform hover:scale-105"
           />
-          <div className="text-center space-y-1">
+          <div className="text-center space-y-2">
             <p className="text-2xl font-bold text-[#001f45] tracking-wide">
               {name}
             </p>
-            <p className="text-gray-700 text-md">{user.email}</p>
+            <p className="text-gray-700 text-md">{email}</p>
+            <p className="text-gray-600 text-sm italic">
+              Registered on: <span className="font-medium">{createdAt}</span>
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Animation */}
       <style>
         {`
           .animate-fade-in {

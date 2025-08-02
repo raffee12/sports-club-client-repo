@@ -56,12 +56,12 @@ const AdminSidebar = () => {
           </NavLink>
         </li>
 
-        {/* <li>
+        <li>
           <NavLink to="/dashboard/admin/bookings" className={linkClass}>
             <AiOutlineSetting size={20} />
             Manage Bookings
           </NavLink>
-        </li> */}
+        </li>
 
         <li>
           <NavLink to="/dashboard/admin/coupons" className={linkClass}>

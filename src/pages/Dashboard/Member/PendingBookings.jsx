@@ -69,8 +69,8 @@ export default function PendingBookings() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gray-50">
-      <div className="w-full max-w-7xl space-y-6">
+    <div className="min-h-screen px-4 py-10 bg-gray-50">
+      <div className="max-w-7xl mx-auto space-y-6">
         <h2 className="text-3xl font-bold text-center text-indigo-900">
           Pending Bookings
         </h2>
@@ -80,7 +80,7 @@ export default function PendingBookings() {
             <p className="text-lg">No pending bookings at the moment.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {bookings.map((booking) => {
               const bookingDate = booking.date || "";
               const slot =

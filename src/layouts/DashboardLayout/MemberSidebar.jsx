@@ -28,7 +28,7 @@ export default function MemberSidebar() {
       {/* Sidebar */}
       <div className="drawer-side z-50">
         <label htmlFor="dashboard-drawer" className="drawer-overlay"></label>
-        <ul className="menu p-4 w-64 min-h-full bg-[#001f45] text-white space-y-2">
+        <ul className="menu p-4 w-64 min-h-full  text-white space-y-2">
           <li>
             <NavLink
               to="/"
@@ -119,18 +119,20 @@ export default function MemberSidebar() {
             </NavLink>
           </li>
 
-          {/* <li>
-            <NavLink
-              to="/dashboard/member/announcements"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-orange-400 font-semibold"
-                  : "text-white hover:text-orange-300"
-              }
-            >
-              <FaBullhorn /> Announcements
-            </NavLink>
-          </li> */}
+          {
+            <li>
+              <NavLink
+                to="/dashboard/member/announcements"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-orange-400 font-semibold"
+                    : "text-white hover:text-orange-300"
+                }
+              >
+                <FaBullhorn /> Announcements
+              </NavLink>
+            </li>
+          }
         </ul>
       </div>
     </div>

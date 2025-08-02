@@ -8,15 +8,13 @@ import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useUserRole from "../../../hooks/useUserRole";
 
-// Import BecomeMemberButton component
-import BecomeMemberButton from "../../../components/BecomeMemberButton";
-
 export default function UserBookings() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const axiosSecure = useAxiosSecure();
   const queryClient = useQueryClient();
   const [cancelingId, setCancelingId] = useState(null);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   const { role, isRoleLoading, refetch: refetchRole } = useUserRole();
 
@@ -34,8 +32,9 @@ export default function UserBookings() {
     },
   });
 
+  // 🔁 If role changes to member, show alert and redirect
   useEffect(() => {
-    if (role === "member") {
+    if (!isRoleLoading && role === "member" && !hasRedirected) {
       Swal.fire({
         icon: "success",
         title: "Welcome to the Club!",
@@ -43,8 +42,12 @@ export default function UserBookings() {
         timer: 2500,
         showConfirmButton: false,
       });
+      setHasRedirected(true);
+      setTimeout(() => {
+        navigate("/dashboard/member/profile");
+      }, 2600); // wait until after the SweetAlert finishes
     }
-  }, [role]);
+  }, [role, isRoleLoading, hasRedirected, navigate]);
 
   const handleCancel = async (bookingId) => {
     const result = await Swal.fire({
@@ -110,13 +113,6 @@ export default function UserBookings() {
       <h2 className="text-4xl font-bold text-center text-indigo-800">
         My Court Bookings
       </h2>
-
-      {/* Show BecomeMemberButton only if user has approved bookings and is not member yet */}
-      {bookings.some((b) => b.status === "approved") && role === "user" && (
-        <div className="max-w-xs mx-auto">
-          <BecomeMemberButton />
-        </div>
-      )}
 
       {bookings.length === 0 ? (
         <div className="bg-gray-900 text-white rounded-xl p-6 shadow-md max-w-md mx-auto text-center space-y-4">

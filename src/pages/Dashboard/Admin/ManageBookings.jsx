@@ -1,96 +1,88 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { FaSearch, FaCheckCircle } from "react-icons/fa";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
-import useAuth from "../../../hooks/useAuth";
+import { FaSearch } from "react-icons/fa";
 
 const ManageBookings = () => {
-  const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
 
   const { data: bookings = [], isLoading } = useQuery({
-    queryKey: ["confirmedBookings", user?.email],
-    enabled: !!user?.email,
+    queryKey: ["confirmedBookings"],
     queryFn: async () => {
-      const res = await axiosSecure.get(
-        `/bookings?userEmail=${user.email}&status=confirmed`
-      );
+      const res = await axiosSecure.get("/bookings", {
+        params: { status: "confirmed" },
+      });
       return res.data;
     },
   });
 
-  const filteredBookings = bookings.filter((booking) =>
-    booking.courtName.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = bookings.filter((booking) =>
+    booking?.courtName?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 p-6 bg-base-100 border border-base-300 rounded-2xl shadow-xl">
-      <h2 className="text-3xl font-bold mb-6 text-center text-success">
-        Manage Bookings
-      </h2>
-
-      <div className="flex items-center gap-3 mb-6 max-w-md mx-auto">
+    <div className="px-4 pt-6 min-h-screen bg-black text-gray-200">
+      <div className="mb-6 flex items-center gap-2">
         <input
           type="text"
-          placeholder="Search by court title"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="input input-bordered w-full"
+          placeholder="Search by court name"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="input input-bordered w-full max-w-xs bg-black text-white border-gray-500 placeholder-gray-400"
         />
-        <FaSearch className="text-xl text-gray-500" />
+        <button className="btn btn-accent text-white">
+          <FaSearch />
+        </button>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-10">
-          <span className="loading loading-spinner w-12 h-12 text-success"></span>
-        </div>
-      ) : filteredBookings.length === 0 ? (
-        <div className="text-center text-gray-600 p-10 bg-gray-50 rounded-xl">
-          No confirmed bookings found.
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="table table-zebra table-lg">
-            <thead className="bg-base-200 text-base font-semibold">
+      <div className="overflow-x-auto rounded-lg border border-gray-600">
+        <table className="table table-zebra w-full text-white">
+          <thead className="bg-gray-900 text-white">
+            <tr>
+              <th>#</th>
+              <th>User Name</th>
+              <th>Email</th>
+              <th>Court</th>
+              <th>Date</th>
+              <th>Slots</th>
+              <th>Price ($)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
               <tr>
-                <th>#</th>
-                <th>Title</th>
-                <th>Date</th>
-                <th>Slot</th>
-                <th>Price</th>
-                <th>Status</th>
+                <td colSpan="7" className="text-center py-4 text-red-400">
+                  No confirmed bookings found.
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredBookings.map((booking, index) => (
-                <tr key={booking._id}>
-                  <th>{index + 1}</th>
+            ) : (
+              filtered.map((booking, index) => (
+                <tr key={booking._id} className="hover:bg-gray-800">
+                  <td>{index + 1}</td>
+                  <td>{booking.userName}</td>
+                  <td className="break-all">{booking.userEmail}</td>
                   <td>{booking.courtName}</td>
-                  <td>
-                    {new Date(booking.date).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
+                  <td className="text-blue-400 font-medium">{booking.date}</td>
+                  <td className="flex flex-wrap gap-1">
+                    {booking.slots?.map((slot, i) => (
+                      <span
+                        key={i}
+                        className="badge badge-outline border-blue-300 text-blue-300"
+                      >
+                        {slot}
+                      </span>
+                    ))}
                   </td>
-                  <td>
-                    {Array.isArray(booking.slots)
-                      ? booking.slots.join(", ")
-                      : "-"}
-                  </td>
-                  <td>${booking.price?.toFixed(2)}</td>
-                  <td>
-                    <span className="badge badge-success flex items-center gap-1">
-                      <FaCheckCircle /> Confirmed
-                    </span>
+                  <td className="text-green-400 font-semibold">
+                    ${booking.price}
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
