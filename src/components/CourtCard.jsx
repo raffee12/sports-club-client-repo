@@ -1,79 +1,163 @@
-import { useState } from "react";
+import React, { useRef, useEffect } from "react";
+import {
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Button,
+  Box,
+} from "@mui/material";
+import { motion } from "framer-motion";
+import gsap from "gsap";
 
-function CourtCard({ court, onBook }) {
-  const slots =
-    Array.isArray(court.slots) && court.slots.length > 0
-      ? court.slots
-      : ["No slots available"];
+export default function CourtCard({ court, onBook }) {
+  const cardRef = useRef(null);
+  const overlayRef = useRef(null);
 
-  const [selectedSlot, setSelectedSlot] = useState(slots[0]);
-  const [imageUrl, setImageUrl] = useState(court.image?.trim() || "");
+  // GSAP entry animation
+  useEffect(() => {
+    if (cardRef.current) {
+      gsap.fromTo(
+        cardRef.current,
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }
+      );
+    }
+  }, []);
 
-  const handleImageError = () => {
-    // No fallback – just clear the src if it errors
-    setImageUrl("");
-  };
+  // Hover animation
+  useEffect(() => {
+    if (cardRef.current) {
+      const tl = gsap.timeline({ paused: true });
+      tl.to(cardRef.current, {
+        scale: 1.05,
+        y: -10,
+        duration: 0.3,
+        ease: "power3.out",
+      });
+      tl.to(
+        overlayRef.current,
+        { opacity: 1, duration: 0.3, ease: "power3.out" },
+        "<"
+      );
+
+      const card = cardRef.current;
+      card.addEventListener("mouseenter", () => tl.play());
+      card.addEventListener("mouseleave", () => tl.reverse());
+    }
+  }, []);
 
   return (
-    <div className="bg-[#001f45] rounded-lg shadow-lg overflow-hidden text-gray-200 flex flex-col w-full max-w-md mx-auto">
-      {imageUrl ? (
-        <img
-          src={imageUrl}
-          alt={court.name || "Court Image"}
-          className="h-48 w-full object-cover"
-          onError={handleImageError}
-        />
-      ) : (
-        <div className="h-48 w-full bg-gray-800 flex items-center justify-center text-sm text-gray-400 italic">
-          No Image
-        </div>
-      )}
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.05 }}
+    >
+      <Card
+        sx={{
+          position: "relative",
+          height: 320,
+          borderRadius: 3,
+          overflow: "hidden",
+          cursor: "pointer",
+          bgcolor: "white",
+          color: "black",
+          border: "2px solid #f97316", // orange base border
+          boxShadow: 6,
+          transition: "all 0.3s",
+          "&:hover": { boxShadow: 12 },
+          "@media (prefers-color-scheme: dark)": {
+            bgcolor: "#001f45", // deep blue in dark mode
+            color: "white",
+            border: "2px solid #f97316",
+          },
+        }}
+      >
+        <Box sx={{ position: "relative", height: 160 }}>
+          <CardMedia
+            component="img"
+            image={court.image || "/images/default-court.jpg"}
+            alt={court.name}
+            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
 
-      <div className="p-4 flex flex-col flex-grow">
-        <h3 className="text-xl font-semibold mb-1">
-          {court.name || "Unnamed Court"}
-        </h3>
-        <p className="mb-2 text-orange-400 font-semibold">
-          {court.type || "Type not specified"}
-        </p>
+          {/* Overlay */}
+          <Box
+            ref={overlayRef}
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              bgcolor: "rgba(249,115,22,0.75)", // semi-transparent orange
+              color: "white",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              textAlign: "center",
+              opacity: 0,
+              px: 2,
+            }}
+          >
+            <Typography variant="h6" fontWeight="bold">
+              {court.name}
+            </Typography>
+            <Typography
+              variant="body1"
+              fontWeight="bold"
+              sx={{
+                mt: 1,
+                "@media (prefers-color-scheme: dark)": {
+                  color: "#f97316", // orange for dark mode
+                  fontWeight: "bold",
+                },
+              }}
+            >
+              ${court.pricePerSession}
+            </Typography>
+          </Box>
+        </Box>
 
-        <label
-          className="mb-1 block font-medium"
-          htmlFor={`slot-select-${court._id || court.id}`}
-        >
-          Select Slot
-        </label>
-        <select
-          id={`slot-select-${court._id || court.id}`}
-          value={selectedSlot}
-          onChange={(e) => setSelectedSlot(e.target.value)}
-          className="mb-3 rounded px-2 py-1 text-black"
-          disabled={slots[0] === "No slots available"}
-        >
-          {slots.map((slot) => (
-            <option key={slot} value={slot}>
-              {slot}
-            </option>
-          ))}
-        </select>
-
-        <p className="mb-4 font-semibold">
-          Price per session: $
-          {typeof court.pricePerSession === "number"
-            ? court.pricePerSession
-            : "N/A"}
-        </p>
-
-        <button
-          onClick={() => onBook(selectedSlot)}
-          className="mt-auto bg-orange-600 hover:bg-orange-700 rounded py-2 text-white font-semibold transition"
-          disabled={slots[0] === "No slots available"}
-        >
-          Book Now
-        </button>
-      </div>
-    </div>
+        <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            sx={{ fontSize: "1.1rem" }}
+          >
+            {court.name}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              "@media (prefers-color-scheme: dark)": {
+                color: "#f97316",
+                fontWeight: "bold",
+              },
+            }}
+          >
+            Price: ${court.pricePerSession}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => onBook(court)}
+            sx={{
+              mt: 1,
+              bgcolor: "#f97316", // orange base
+              color: "white",
+              fontWeight: "bold",
+              borderRadius: "8px",
+              transition: "all 0.3s ease",
+              "&:hover": { bgcolor: "#ea5806" }, // deeper orange on hover
+            }}
+          >
+            Book Now
+          </Button>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
-
-export default CourtCard;

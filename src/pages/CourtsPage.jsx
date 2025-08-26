@@ -15,15 +15,14 @@ export default function CourtsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCourt, setSelectedCourt] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState(""); // asc or desc
   const courtsPerPage = 6;
 
-  // Fetch courts from backend
   useEffect(() => {
     const fetchCourts = async () => {
       try {
         const res = await axiosSecure.get("/courts");
-        setCourts(res.data); // No modification
-        console.log(res.data);
+        setCourts(res.data);
       } catch (error) {
         console.error("Failed to fetch courts:", error);
       }
@@ -31,10 +30,17 @@ export default function CourtsPage() {
     fetchCourts();
   }, [axiosSecure]);
 
-  const totalPages = Math.ceil(courts.length / courtsPerPage);
+  const sortedCourts = [...courts].sort((a, b) => {
+    if (!sortOrder) return 0;
+    return sortOrder === "asc"
+      ? a.pricePerSession - b.pricePerSession
+      : b.pricePerSession - a.pricePerSession;
+  });
+
+  const totalPages = Math.ceil(sortedCourts.length / courtsPerPage);
   const indexOfLastCourt = currentPage * courtsPerPage;
   const indexOfFirstCourt = indexOfLastCourt - courtsPerPage;
-  const currentCourts = courts.slice(indexOfFirstCourt, indexOfLastCourt);
+  const currentCourts = sortedCourts.slice(indexOfFirstCourt, indexOfLastCourt);
 
   const openBookingModal = (court) => {
     if (!user) {
@@ -51,30 +57,46 @@ export default function CourtsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
-      <h1 className="text-4xl font-bold mb-6 text-center text-white">
-        🏟 Courts
-      </h1>
+    <div className="max-full mx-auto p-6 space-y-6 transition-colors duration-500 bg-white text-black dark:bg-black dark:text-white">
+      <h1 className="text-4xl font-bold text-center">🏟 Courts</h1>
+
+      {/* Sorting */}
+      <div className="max-w-6xl mx-auto flex justify-end gap-3 mb-4">
+        <button
+          onClick={() => setSortOrder("asc")}
+          className={`px-4 py-2 rounded-md font-semibold transition ${
+            sortOrder === "asc"
+              ? "bg-orange-600 text-white shadow-md hover:bg-orange-700"
+              : "border-2 border-orange-600 text-orange-600 bg-transparent hover:bg-orange-600 hover:text-white"
+          }`}
+        >
+          Price Low → High
+        </button>
+        <button
+          onClick={() => setSortOrder("desc")}
+          className={`px-4 py-2 rounded-md font-semibold transition ${
+            sortOrder === "desc"
+              ? "bg-orange-600 text-white shadow-md hover:bg-orange-700"
+              : "border-2 border-orange-600 text-orange-600 bg-transparent hover:bg-orange-600 hover:text-white"
+          }`}
+        >
+          Price High → Low
+        </button>
+      </div>
 
       {/* Court Grid */}
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <div className="max-w-6xl mx-auto grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {currentCourts.map((court) => (
-          <CourtCard
-            key={court._id}
-            court={court}
-            onBook={(slot) =>
-              openBookingModal({ ...court, selectedSlot: slot })
-            }
-          />
+          <CourtCard key={court._id} court={court} onBook={openBookingModal} />
         ))}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center gap-2 mt-8">
+      <div className="flex justify-center items-center gap-2 mt-6">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="p-2 rounded-full text-white bg-yellow-500 hover:bg-orange-500 disabled:opacity-30 transition"
+          className="p-2 rounded-full text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-30 transition"
         >
           <FiChevronLeft size={22} />
         </button>
@@ -85,8 +107,8 @@ export default function CourtsPage() {
             onClick={() => setCurrentPage(i + 1)}
             className={`w-10 h-10 rounded-full font-semibold text-white transition ${
               currentPage === i + 1
-                ? "bg-orange-500"
-                : "bg-yellow-500 hover:bg-orange-500"
+                ? "bg-orange-600"
+                : "bg-orange-700 hover:bg-orange-500"
             }`}
           >
             {i + 1}
@@ -98,13 +120,12 @@ export default function CourtsPage() {
             setCurrentPage((prev) => Math.min(prev + 1, totalPages))
           }
           disabled={currentPage === totalPages}
-          className="p-2 rounded-full text-white bg-yellow-500 hover:bg-orange-500 disabled:opacity-30 transition"
+          className="p-2 rounded-full text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-30 transition"
         >
           <FiChevronRight size={22} />
         </button>
       </div>
 
-      {/* Booking Modal */}
       {modalOpen && selectedCourt && (
         <BookingModal court={selectedCourt} onClose={closeBookingModal} />
       )}

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Swal from "sweetalert2";
 import useAuth from "../hooks/useAuth";
 import useAxiosSecure from "../hooks/useAxiosSecure";
+import { gsap } from "gsap";
 
 function BookingModal({ court, onClose }) {
   const { user } = useAuth();
@@ -9,6 +10,19 @@ function BookingModal({ court, onClose }) {
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [bookingDate, setBookingDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const modalRef = useRef(null);
+
+  // GSAP Entry Animation
+  useEffect(() => {
+    if (modalRef.current) {
+      gsap.fromTo(
+        modalRef.current,
+        { y: -50, opacity: 0, scale: 0.95 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }
+      );
+    }
+  }, []);
 
   const toggleSlot = (slot) => {
     setSelectedSlots((prev) =>
@@ -28,7 +42,6 @@ function BookingModal({ court, onClose }) {
         "warning"
       );
     }
-
     if (selectedSlots.length === 0) {
       return Swal.fire(
         "No Slot Selected",
@@ -62,10 +75,10 @@ function BookingModal({ court, onClose }) {
         html: `
           <p><strong>${
             court.name
-          }</strong> for <span style="color:#f97316;">${bookingDate}</span></p>
+          }</strong> for <span style="color:#ff7b00;">${bookingDate}</span></p>
           <p>Slots: <strong>${selectedSlots.join(", ")}</strong></p>
-          <p>Total Price: <strong style="color:#facc15;">$${totalPrice}</strong></p>
-          <p>Status: <strong style="color:#f43f5e;">Pending Approval</strong></p>
+          <p>Total Price: <strong style="color:#ff7b00;">$${totalPrice}</strong></p>
+          <p>Status: <strong style="color:#ff7b00;">Pending Approval</strong></p>
         `,
       }).then(() => onClose());
     } catch (err) {
@@ -81,38 +94,43 @@ function BookingModal({ court, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4">
-      <div className="bg-[#001f45] rounded-lg max-w-lg w-full p-6 text-gray-200 relative">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+      <div
+        ref={modalRef}
+        className="bg-[#001f45] rounded-xl max-w-md w-full p-6 text-gray-200 relative shadow-2xl border border-orange-500"
+      >
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-white text-xl font-bold"
+          className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl font-bold transition"
           aria-label="Close modal"
         >
           &times;
         </button>
 
-        <h2 className="text-2xl font-bold mb-4 text-orange-400">
+        {/* Modal Title */}
+        <h2 className="text-3xl font-extrabold mb-5 text-orange-400 flex items-center gap-2">
           {court.name} Booking
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Court Type */}
           <div>
-            <label className="block font-semibold text-teal-300">
+            <label className="block font-semibold text-gray-200 mb-1">
               Court Type
             </label>
             <input
               type="text"
               value={court.type}
               readOnly
-              className="w-full rounded px-3 py-2 bg-gray-700 text-gray-300 cursor-not-allowed"
+              className="w-full rounded-lg px-3 py-2 bg-[#001f45] text-gray-200 cursor-not-allowed border border-gray-600"
             />
           </div>
 
           {/* Booking Date */}
           <div>
             <label
-              className="block font-semibold text-teal-300"
+              className="block font-semibold text-gray-200 mb-1"
               htmlFor="booking-date"
             >
               Booking Date
@@ -122,7 +140,7 @@ function BookingModal({ court, onClose }) {
               type="date"
               value={bookingDate}
               onChange={(e) => setBookingDate(e.target.value)}
-              className="w-full rounded px-3 py-2 bg-white text-black focus:ring-2 focus:ring-orange-400 outline-none"
+              className="w-full rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-orange-400 outline-none border border-gray-300"
               min={new Date().toISOString().split("T")[0]}
               required
             />
@@ -130,7 +148,7 @@ function BookingModal({ court, onClose }) {
 
           {/* Slots */}
           <div>
-            <label className="block font-semibold mb-1 text-teal-300">
+            <label className="block font-semibold mb-2 text-gray-200">
               Select Slots
             </label>
             <div className="flex flex-wrap gap-2">
@@ -141,10 +159,10 @@ function BookingModal({ court, onClose }) {
                     key={slot}
                     type="button"
                     onClick={() => toggleSlot(slot)}
-                    className={`px-3 py-1 rounded border transition-all duration-150 ${
+                    className={`px-4 py-2 rounded-lg font-medium border transition-all duration-200 ${
                       selected
-                        ? "bg-orange-600 border-orange-600 text-white"
-                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
+                        ? "bg-orange-600 border-orange-600 text-white shadow-md hover:bg-orange-700"
+                        : "bg-transparent border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white"
                     }`}
                   >
                     {slot}
@@ -157,7 +175,7 @@ function BookingModal({ court, onClose }) {
           {/* Total Price */}
           <p className="font-semibold text-lg">
             Total Price:{" "}
-            <span className="text-yellow-400 font-bold">${totalPrice}</span>
+            <span className="text-orange-400 font-bold">${totalPrice}</span>
           </p>
 
           {/* Actions */}
@@ -166,14 +184,14 @@ function BookingModal({ court, onClose }) {
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition"
+              className="px-4 py-2 rounded-lg font-semibold border border-orange-500 text-orange-500 bg-transparent hover:bg-orange-500 hover:text-white transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-2 rounded bg-orange-600 hover:bg-orange-700 text-white font-semibold transition"
+              className="px-6 py-2 rounded-lg font-bold bg-orange-600 text-white hover:bg-orange-700 transition-all"
             >
               {submitting ? "Booking..." : "Submit Booking"}
             </button>

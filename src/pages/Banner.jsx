@@ -1,85 +1,155 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules";
+import { Pagination, Autoplay, EffectFade } from "swiper/modules";
+import { Typewriter } from "react-simple-typewriter";
 import { motion } from "framer-motion";
 import "swiper/css";
 import "swiper/css/pagination";
-import { Typewriter } from "react-simple-typewriter";
+import "swiper/css/effect-fade";
 
 const slides = [
   {
-    img: "/images/club.jpg",
-    title: "Welcome to Our Exclusive Club",
-    subtitle: "Where Champions Train and Thrive.",
+    img: "/images/banner1.jpg",
+    tagline: "Exclusive Community",
+    title: "Welcome to Our Club",
+    subtitle: "Where Enthusiasm Meets Excellence.",
+    info: "Join a family of champions who push boundaries, train hard, and thrive together.",
   },
   {
-    img: "/images/court.jpg",
+    img: "/images/banner2.jpg",
+    tagline: "Elite Facilities",
     title: "Premier Courts Await",
-    subtitle: "Book Your Elite Playing Experience.",
+    subtitle: "Book your personalized playing experience.",
+    info: "Experience world-class courts designed for professionals and enthusiasts alike.",
   },
   {
-    img: "/images/activities.jpg",
-    title: "Dynamic Activities",
-    subtitle: "Join Luxurious Tournaments & Events.",
+    img: "/images/banner3.jpg",
+    tagline: "Professional Training",
+    title: "Coaching by Experts",
+    subtitle: "Learn from the best to become the best.",
+    info: "Our certified coaches help refine your skills and build your confidence.",
   },
 ];
 
 const Banner = () => {
   return (
-    <div className="w-full max-w-6xl mx-auto py-10 px-4">
+    <div className="relative w-full h-screen overflow-hidden">
       <Swiper
-        modules={[Pagination, Autoplay]}
-        slidesPerView={1}
+        modules={[Pagination, Autoplay, EffectFade]}
         pagination={{ clickable: true }}
-        autoplay={{ delay: 6000 }}
+        autoplay={{ delay: 5000, disableOnInteraction: false }}
+        effect="fade"
         loop
-        className="rounded-2xl shadow-xl"
+        className="w-full h-full"
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
-            <div className="relative h-80 md:h-[450px] overflow-hidden rounded-2xl">
-              <img
+            <div className="relative w-full h-[100vh]">
+              {/* Background Image with zoom effect */}
+              <motion.img
                 src={slide.img}
                 alt={slide.title}
-                className="w-full h-full object-cover brightness-[0.6]"
+                className="w-full h-full object-cover object-top"
+                initial={{ scale: 1.1 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 8, ease: "easeOut" }}
               />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
-                <motion.h2
-                  className="text-3xl md:text-5xl font-bold mb-2"
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1 }}
+
+              {/* Subtle Black Overlay */}
+              <div className="absolute inset-0 bg-black/40"></div>
+
+              {/* Content */}
+              <motion.div
+                className="absolute inset-0 flex flex-col justify-center items-start px-4 md:px-12 max-w-7xl mx-auto text-white"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0, y: 50 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { staggerChildren: 0.2, duration: 1.2 },
+                  },
+                }}
+              >
+                <motion.p
+                  className="uppercase tracking-wide text-sm md:text-lg text-[#f97316] font-urbanist font-bold"
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                >
+                  {slide.tagline}
+                </motion.p>
+                <motion.h1
+                  className="text-3xl md:text-5xl lg:text-6xl font-urbanist font-extrabold mb-2 drop-shadow-lg"
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
                 >
                   {slide.title}
-                </motion.h2>
-                <motion.p
-                  className="text-md md:text-xl font-light max-w-xl"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 1 }}
+                </motion.h1>
+                <motion.h2
+                  className="text-lg md:text-2xl mb-4 font-urbanist font-semibold"
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
                 >
                   <Typewriter
                     words={[slide.subtitle]}
-                    loop={false}
+                    loop={0}
                     cursor
-                    cursorStyle="_"
+                    cursorStyle="|"
                     typeSpeed={60}
                     deleteSpeed={40}
                     delaySpeed={2000}
                   />
+                </motion.h2>
+                <motion.p
+                  className="max-w-xl text-sm md:text-lg text-gray-200 font-poppins mb-6"
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                >
+                  {slide.info}
                 </motion.p>
-              </div>
+
+                {/* CTA Buttons */}
+                <motion.div
+                  className="mt-6 flex gap-4"
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                >
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    className="px-6 py-3 bg-[#001f45] hover:bg-[#5883b8] transition duration-300 text-white font-poppins font-semibold rounded-lg shadow-lg"
+                  >
+                    Join Now
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    className="px-6 py-3 border-2 border-[#f97316] hover:bg-[#f97316] hover:text-white transition duration-300 text-[#f97316] font-poppins font-semibold rounded-lg shadow-lg"
+                  >
+                    Explore Courts
+                  </motion.button>
+                </motion.div>
+              </motion.div>
             </div>
           </SwiperSlide>
         ))}
       </Swiper>
 
-      {/* Custom Swiper Pagination Bullets */}
+      {/* Pagination Bullets */}
       <style>
         {`
           .swiper-pagination-bullet {
-            background: #facc15;
-            opacity: 0.5;
+            background: #fff;
+            opacity: 0.4;
             width: 14px;
             height: 14px;
             border-radius: 9999px;
@@ -87,8 +157,8 @@ const Banner = () => {
           }
           .swiper-pagination-bullet-active {
             opacity: 1;
-            background: #f59e0b;
-            transform: scale(1.2);
+            background: #f97316;
+            transform: scale(1.3);
           }
         `}
       </style>

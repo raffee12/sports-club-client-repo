@@ -4,18 +4,32 @@ import Banner from "./Banner";
 import LocationSection from "../components/LocationSection";
 import About from "../components/About";
 import Promotions from "../components/Promotions";
+import Testimonials from "../components/Testimonials";
+
+import ContactUs from "../components/ContactUs";
+import Achievements from "../components/Achievements";
+import HowItWorks from "../components/HowitWorks";
 
 export default function Home() {
   return (
     <>
       <Banner />
       <About></About>
-      <div className="max-w-6xl mx-auto px-4 py-10">
+
+      <Testimonials></Testimonials>
+      <ContactUs></ContactUs>
+      <div className=" mx-auto">
         <LocationSection />
       </div>
-      <div className=" py-10">
+      <div>
         {" "}
         <Promotions></Promotions>
+      </div>
+      <div>
+        <Achievements></Achievements>
+      </div>
+      <div>
+        <HowItWorks></HowItWorks>
       </div>
     </>
   );

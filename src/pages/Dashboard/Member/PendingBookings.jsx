@@ -1,14 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FiCalendar, FiClock, FiTag, FiTrash2 } from "react-icons/fi";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Button,
+  Chip,
+} from "@mui/material";
+import { motion } from "framer-motion";
+import gsap from "gsap";
+import { useNavigate } from "react-router-dom";
 
 export default function PendingBookings() {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const [cancelingId, setCancelingId] = useState(null);
+  const cardRefs = useRef([]);
+  const navigate = useNavigate();
 
   const {
     data: bookings = [],
@@ -26,6 +39,26 @@ export default function PendingBookings() {
     },
   });
 
+  useEffect(() => {
+    if (cardRefs.current.length > 0) {
+      cardRefs.current.forEach((el, i) => {
+        if (el) {
+          gsap.fromTo(
+            el,
+            { y: 40, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.5,
+              delay: i * 0.1,
+              ease: "power3.out",
+            }
+          );
+        }
+      });
+    }
+  }, [bookings]);
+
   const handleCancel = async (id) => {
     const result = await Swal.fire({
       title: "Cancel Booking?",
@@ -34,8 +67,8 @@ export default function PendingBookings() {
       showCancelButton: true,
       confirmButtonText: "Yes, cancel it",
       cancelButtonText: "No, keep it",
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: "#ff7b00",
+      cancelButtonColor: "#001f45",
     });
 
     if (result.isConfirmed) {
@@ -54,95 +87,199 @@ export default function PendingBookings() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[200px]">
-        <span className="loading loading-spinner w-12 h-12 text-primary"></span>
-      </div>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
+        <span className="loading loading-spinner w-12 h-12 text-orange-500"></span>
+      </Box>
     );
   }
 
   if (isError) {
     return (
-      <div className="text-red-600 text-center font-medium">
+      <Typography color="error" align="center" fontWeight="bold">
         Failed to load pending bookings.
-      </div>
+      </Typography>
     );
   }
 
   return (
-    <div className="min-h-screen px-4 py-10 bg-gray-50">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <h2 className="text-3xl font-bold text-center text-indigo-900">
-          Pending Bookings
-        </h2>
+    <Box className="min-h-screen px-4 py-10 bg-white dark:bg-black transition-colors duration-500">
+      <Typography
+        variant="h4"
+        align="center"
+        fontWeight="bold"
+        gutterBottom
+        sx={{ color: "#ff7b00" }}
+      >
+        Pending Bookings
+      </Typography>
 
-        {bookings.length === 0 ? (
-          <div className="text-center text-gray-600 bg-white p-8 rounded-xl shadow">
-            <p className="text-lg">No pending bookings at the moment.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {bookings.map((booking) => {
-              const bookingDate = booking.date || "";
-              const slot =
-                Array.isArray(booking.slots) && booking.slots.length > 0
-                  ? booking.slots.join(", ")
-                  : "No slot";
+      {bookings.length === 0 ? (
+        <Card
+          sx={{
+            maxWidth: 600,
+            mx: "auto",
+            mt: 4,
+            p: 4,
+            borderRadius: "1.5rem",
+            backgroundColor: "#001f45",
+            border: "2px solid white",
+            color: "#ff7b00",
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            No pending bookings at the moment.
+          </Typography>
 
-              return (
-                <div
-                  key={booking._id}
-                  className="rounded-xl bg-white border border-gray-200 p-5 shadow hover:shadow-lg transition-all"
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <Button
+              onClick={() => navigate("/courts")}
+              sx={{
+                mt: 2,
+                backgroundColor: "#ff7b00",
+                color: "white",
+                fontWeight: "bold",
+                textTransform: "none",
+                "&:hover": { backgroundColor: "#e66b00" },
+              }}
+            >
+              Book a Court
+            </Button>
+          </motion.div>
+        </Card>
+      ) : (
+        <Box
+          display="grid"
+          gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr", lg: "1fr 1fr 1fr" }}
+          gap={4}
+          mt={4}
+        >
+          {bookings.map((booking, idx) => {
+            const bookingDate = booking.date || "";
+            const slot =
+              Array.isArray(booking.slots) && booking.slots.length > 0
+                ? booking.slots.join(", ")
+                : "No slot";
+
+            return (
+              <motion.div
+                key={booking._id}
+                whileHover={{
+                  scale: 1.03,
+                  boxShadow: "0 0 20px 4px rgba(255,123,0,0.5)",
+                }}
+                transition={{ type: "spring", stiffness: 200 }}
+                ref={(el) => (cardRefs.current[idx] = el)}
+              >
+                <Card
+                  sx={{
+                    borderRadius: "1.5rem",
+                    backgroundColor: "#001f45",
+                    border: "2px solid white",
+                    color: "#ff7b00",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
                 >
-                  <h3 className="text-xl font-semibold text-indigo-800 mb-2">
-                    {booking.courtName}
-                    <span className="ml-2 text-sm text-gray-500">
-                      ({booking.courtType})
-                    </span>
-                  </h3>
+                  <CardContent>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                      {booking.courtName}{" "}
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{ color: "white" }}
+                      >
+                        ({booking.courtType})
+                      </Typography>
+                    </Typography>
 
-                  <div className="text-gray-800 space-y-2 text-sm">
-                    <p className="flex items-center gap-2">
-                      <FiCalendar className="text-indigo-500" />
-                      {new Date(bookingDate).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <FiClock className="text-teal-500" />
-                      {slot}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <FiTag className="text-green-600" />$
-                      {booking.price?.toFixed(2)}
-                    </p>
-                  </div>
+                    <Box mt={1} fontSize="0.95rem" sx={{ color: "white" }}>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <FiCalendar color="#ff7b00" />
+                        {new Date(bookingDate).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={1} mt={1}>
+                        <FiClock color="#ff7b00" />
+                        {slot}
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={1} mt={1}>
+                        <FiTag color="#ff7b00" /> ${booking.price?.toFixed(2)}
+                      </Box>
+                    </Box>
+                  </CardContent>
 
-                  <div className="mt-4 flex justify-between items-center">
-                    <span className="badge bg-yellow-100 text-yellow-800 border-0">
-                      Pending
-                    </span>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    px={2}
+                    pb={2}
+                  >
+                    <Chip
+                      label="Pending"
+                      sx={{
+                        backgroundColor: "#ff7b00",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
+                    />
 
-                    <button
-                      onClick={() => handleCancel(booking._id)}
-                      disabled={cancelingId === booking._id}
-                      className={`btn btn-sm flex gap-1 items-center text-white ${
-                        cancelingId === booking._id
-                          ? "btn-disabled"
-                          : "btn-error hover:scale-105"
-                      }`}
-                    >
-                      <FiTrash2 />
-                      {cancelingId === booking._id ? "Cancelling..." : "Cancel"}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+                    <Box display="flex" gap={1}>
+                      <Button
+                        variant="outlined"
+                        onClick={() => navigate("/courts")}
+                        sx={{
+                          borderColor: "#ff7b00",
+                          color: "#ff7b00",
+                          fontWeight: "bold",
+                          textTransform: "none",
+                          "&:hover": {
+                            borderColor: "#ff7b00",
+                            backgroundColor: "#ff7b0033",
+                          },
+                        }}
+                      >
+                        Reschedule
+                      </Button>
+                      <Button
+                        onClick={() => handleCancel(booking._id)}
+                        disabled={cancelingId === booking._id}
+                        startIcon={<FiTrash2 />}
+                        sx={{
+                          backgroundColor: "#ff7b00",
+                          color: "white",
+                          fontWeight: "bold",
+                          textTransform: "none",
+                          "&:hover": { backgroundColor: "#e66b00" },
+                        }}
+                      >
+                        {cancelingId === booking._id
+                          ? "Cancelling..."
+                          : "Cancel"}
+                      </Button>
+                    </Box>
+                  </Box>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </Box>
+      )}
+    </Box>
   );
 }

@@ -19,7 +19,7 @@ import MemberRoute from "./MemberRoute.jsx";
 import DashboardRedirect from "../components/DashboardRedirect.jsx";
 
 // ✅ User Dashboard Pages
-import UserDashboard from "../pages/Dashboard/User/UserDashboard.jsx"; // ✅ ADDED
+import OverviewPage from "../pages/Dashboard/OverviewPage.jsx";
 import UserProfile from "../pages/Dashboard/User/UserProfile.jsx";
 import UserBookings from "../pages/Dashboard/User/UserBookings.jsx";
 import UserAnnouncements from "../pages/Dashboard/User/UserAnnouncements.jsx";
@@ -42,6 +42,8 @@ import ApprovedBookings from "../pages/Dashboard/Member/ApprovedBookings.jsx";
 import ConfirmedBookings from "../pages/Dashboard/Member/ConfirmedBookings.jsx";
 import PaymentPage from "../pages/Dashboard/Member/PaymentPage.jsx";
 import PaymentHistory from "../pages/Dashboard/Member/PaymentHistory.jsx";
+import BlogPage from "../pages/BlogPage.jsx";
+import Training from "../pages/Training.jsx";
 
 const router = createBrowserRouter([
   // 🌐 Public Site
@@ -54,6 +56,9 @@ const router = createBrowserRouter([
       { path: "/login", element: <Login /> },
       { path: "/register", element: <Register /> },
       { path: "/courts", element: <CourtsPage /> },
+      { path: "/BlogPage", element: <BlogPage /> },
+      { path: "/BlogPage", element: <BlogPage /> },
+      { path: "/training", element: <Training /> },
       { path: "/forbidden", element: <ForbiddenPage /> },
     ],
   },
@@ -73,10 +78,10 @@ const router = createBrowserRouter([
 
       // ✅ User Routes
       {
-        path: "user",
+        path: "user/overview",
         element: (
           <PrivateRoute>
-            <UserDashboard />
+            <OverviewPage />
           </PrivateRoute>
         ),
       },

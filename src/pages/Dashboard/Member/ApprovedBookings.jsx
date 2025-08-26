@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Swal from "sweetalert2";
 import {
   FiCalendar,
   FiClock,
@@ -9,20 +7,32 @@ import {
   FiTrash2,
   FiDollarSign,
 } from "react-icons/fi";
+import Swal from "sweetalert2";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Button,
+  Chip,
+} from "@mui/material";
+import { motion } from "framer-motion";
+import gsap from "gsap";
+import { useNavigate } from "react-router-dom";
 
 export default function ApprovedBookings() {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const navigate = useNavigate();
   const [processingId, setProcessingId] = useState(null);
+  const cardRefs = useRef([]);
 
   const {
     data: bookings = [],
     isLoading,
     isError,
-    error,
     refetch,
   } = useQuery({
     queryKey: ["approvedBookings", user?.email],
@@ -33,24 +43,46 @@ export default function ApprovedBookings() {
     },
   });
 
+  useEffect(() => {
+    if (cardRefs.current.length > 0) {
+      cardRefs.current.forEach((el, i) => {
+        if (el) {
+          gsap.fromTo(
+            el,
+            { y: 40, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.5,
+              delay: i * 0.1,
+              ease: "power3.out",
+            }
+          );
+        }
+      });
+    }
+  }, [bookings]);
+
   const handleCancel = async (id) => {
-    const confirm = await Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to cancel this approved booking?",
+    const result = await Swal.fire({
+      title: "Cancel Booking?",
+      text: "This will remove your approved booking.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, cancel it!",
-      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, cancel it",
+      cancelButtonText: "No, keep it",
+      confirmButtonColor: "#ff7b00",
+      cancelButtonColor: "#001f45",
     });
 
-    if (confirm.isConfirmed) {
+    if (result.isConfirmed) {
       try {
         setProcessingId(id);
         await axiosSecure.delete(`/bookings/${id}`);
         await refetch();
-        Swal.fire("Cancelled", "Booking has been cancelled.", "success");
+        Swal.fire("Cancelled!", "Your booking has been cancelled.", "success");
       } catch (err) {
-        Swal.fire("Error", "Could not cancel booking.", "error");
+        Swal.fire("Error", "Something went wrong!", "error");
       } finally {
         setProcessingId(null);
       }
@@ -63,126 +95,200 @@ export default function ApprovedBookings() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[200px]">
-        <span className="loading loading-spinner text-primary w-12 h-12"></span>
-      </div>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
+        <span className="loading loading-spinner w-12 h-12 text-orange-500"></span>
+      </Box>
     );
   }
 
   if (isError) {
     return (
-      <div className="text-center text-red-600 font-semibold">
-        <p>Failed to load approved bookings.</p>
-        <pre className="whitespace-pre-wrap">
-          {JSON.stringify(error, null, 2)}
-        </pre>
-      </div>
+      <Typography color="error" align="center" fontWeight="bold">
+        Failed to load approved bookings.
+      </Typography>
     );
   }
 
   return (
-    <div className="space-y-8 px-4">
-      <h2 className="text-4xl font-bold text-center text-green-700">
+    <Box className="min-h-screen px-4 py-10 bg-white dark:bg-black transition-colors duration-500">
+      <Typography
+        variant="h4"
+        align="center"
+        fontWeight="bold"
+        gutterBottom
+        sx={{ color: "#ff7b00" }}
+      >
         Approved Bookings
-      </h2>
+      </Typography>
 
       {bookings.length === 0 ? (
-        <div className="bg-white text-gray-700 rounded-xl p-6 shadow-md max-w-md mx-auto text-center space-y-4">
-          <h3 className="text-2xl font-semibold">No Approved Bookings</h3>
-          <p className="text-gray-500">
-            You currently have no approved bookings awaiting payment.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {bookings.map((booking) => {
-            const bookingDate = booking.date
-              ? new Date(booking.date).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })
-              : "No date";
+        <Card
+          sx={{
+            maxWidth: 600,
+            mx: "auto",
+            mt: 4,
+            p: 4,
+            borderRadius: "1.5rem",
+            backgroundColor: "#001f45",
+            border: "2px solid white",
+            color: "#ff7b00",
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            No approved bookings at the moment.
+          </Typography>
 
-            const slots = Array.isArray(booking.slots)
-              ? booking.slots.join(", ")
-              : "No slot";
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <Button
+              onClick={() => navigate("/courts")}
+              sx={{
+                mt: 2,
+                backgroundColor: "#ff7b00",
+                color: "white",
+                fontWeight: "bold",
+                textTransform: "none",
+                "&:hover": { backgroundColor: "#e66b00" },
+              }}
+            >
+              Book a Court
+            </Button>
+          </motion.div>
+        </Card>
+      ) : (
+        <Box
+          display="grid"
+          gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr", lg: "1fr 1fr 1fr" }}
+          gap={4}
+          mt={4}
+        >
+          {bookings.map((booking, idx) => {
+            const bookingDate = booking.date || "";
+            const slots =
+              Array.isArray(booking.slots) && booking.slots.length > 0
+                ? booking.slots.join(", ")
+                : "No slot";
 
             return (
-              <div
+              <motion.div
                 key={booking._id}
-                className="relative bg-white border border-green-100 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300"
+                whileHover={{
+                  scale: 1.03,
+                  boxShadow: "0 0 20px 4px rgba(255,123,0,0.5)",
+                }}
+                transition={{ type: "spring", stiffness: 200 }}
+                ref={(el) => (cardRefs.current[idx] = el)}
               >
-                {/* PAID Badge */}
-                {booking.isPaid && (
-                  <div className="absolute top-3 right-3 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
-                    PAID
-                  </div>
-                )}
+                <Card
+                  sx={{
+                    borderRadius: "1.5rem",
+                    backgroundColor: "#001f45",
+                    border: "2px solid white",
+                    color: "#ff7b00",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                      {booking.courtName}{" "}
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{ color: "white" }}
+                      >
+                        ({booking.courtType})
+                      </Typography>
+                    </Typography>
 
-                <h3 className="text-xl font-bold text-green-900">
-                  {booking.courtName}
-                  <span className="ml-1 text-sm text-gray-500">
-                    ({booking.courtType})
-                  </span>
-                </h3>
+                    <Box mt={1} fontSize="0.95rem" sx={{ color: "white" }}>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <FiCalendar color="#ff7b00" />
+                        {new Date(bookingDate).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={1} mt={1}>
+                        <FiClock color="#ff7b00" />
+                        {slots}
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={1} mt={1}>
+                        <FiTag color="#ff7b00" /> ${booking.price?.toFixed(2)}
+                      </Box>
+                    </Box>
+                  </CardContent>
 
-                <div className="mt-3 space-y-2 text-sm text-gray-700">
-                  <p className="flex items-center justify-center gap-2">
-                    <FiCalendar className="text-green-600" />
-                    <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs">
-                      {bookingDate}
-                    </span>
-                  </p>
-                  <p className="flex items-center justify-center gap-2">
-                    <FiClock className="text-green-500" />
-                    <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs">
-                      {slots}
-                    </span>
-                  </p>
-                  <p className="flex items-center justify-center gap-2">
-                    <FiTag className="text-green-400" />
-                    <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
-                      ${booking.price?.toFixed(2) || "N/A"}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="mt-6 flex flex-wrap justify-center gap-4 w-full">
-                  {booking.isPaid ? (
-                    <button
-                      disabled
-                      className="btn btn-sm btn-outline btn-success text-green-600 w-28 cursor-default"
-                    >
-                      <FiDollarSign />
-                      Paid
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handlePayment(booking)}
-                      className="btn btn-sm btn-success text-white flex items-center gap-2 w-28"
-                    >
-                      <FiDollarSign />
-                      Pay Now
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => handleCancel(booking._id)}
-                    disabled={processingId === booking._id}
-                    className={`btn btn-sm btn-error text-white flex items-center gap-2 w-28 ${
-                      processingId === booking._id ? "btn-disabled" : ""
-                    }`}
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    px={2}
+                    pb={2}
                   >
-                    <FiTrash2 />
-                    {processingId === booking._id ? "Cancelling..." : "Cancel"}
-                  </button>
-                </div>
-              </div>
+                    <Chip
+                      label={booking.isPaid ? "Paid" : "Approved"}
+                      sx={{
+                        backgroundColor: booking.isPaid ? "#22c55e" : "#ff7b00",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
+                    />
+
+                    <Box display="flex" gap={1}>
+                      {!booking.isPaid && (
+                        <Button
+                          variant="contained"
+                          onClick={() => handlePayment(booking)}
+                          startIcon={<FiDollarSign />}
+                          sx={{
+                            backgroundColor: "#ff7b00",
+                            color: "white",
+                            fontWeight: "bold",
+                            textTransform: "none",
+                            "&:hover": { backgroundColor: "#e66b00" },
+                          }}
+                        >
+                          Pay Now
+                        </Button>
+                      )}
+
+                      <Button
+                        onClick={() => handleCancel(booking._id)}
+                        disabled={processingId === booking._id}
+                        startIcon={<FiTrash2 />}
+                        sx={{
+                          backgroundColor: "#ff7b00",
+                          color: "white",
+                          fontWeight: "bold",
+                          textTransform: "none",
+                          "&:hover": { backgroundColor: "#e66b00" },
+                          opacity: processingId === booking._id ? 0.6 : 1,
+                        }}
+                      >
+                        {processingId === booking._id
+                          ? "Cancelling..."
+                          : "Cancel"}
+                      </Button>
+                    </Box>
+                  </Box>
+                </Card>
+              </motion.div>
             );
           })}
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }
